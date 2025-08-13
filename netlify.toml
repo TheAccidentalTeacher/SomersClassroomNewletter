@@ -1,6 +1,6 @@
 [build]
   publish = "out"
-  command = "npm ci && npm run netlify-build"
+  command = "npm install && npm run netlify-build"
 
 [build.environment]
   NODE_VERSION = "18"
