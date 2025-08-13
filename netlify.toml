@@ -1,0 +1,7 @@
+﻿[build]
+  publish = "out"
+  command = "pip install -r requirements.txt && PYTHONPATH=src python -m newsletter.cli generate --data data/sample_week.yml --out out && mkdir -p out && cp -R assets out/"
+
+[build.environment]
+  PYTHON_VERSION = "3.11"
+  PIP_DISABLE_PIP_VERSION_CHECK = "1"

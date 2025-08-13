@@ -1,0 +1,50 @@
+﻿<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>{{ cfg.brand_name }} Newsletter</title>
+  <style>
+    :root{
+      --primary: {{ cfg.primary_color }};
+      --accent: {{ cfg.accent_color }};
+      --bg: #0a0a0a;
+      --text: #f2f2f2;
+    }
+    *{ box-sizing: border-box; }
+    body{ margin:0; background:var(--bg); color:var(--text); font-family: system-ui, Segoe UI, Roboto, Arial, sans-serif; }
+    .wrap{ max-width: 900px; margin: 0 auto; padding: 24px; }
+    header{
+      background: linear-gradient(135deg, var(--primary), #111);
+      border-bottom: 4px solid var(--accent);
+      padding: 24px; position: relative; overflow: hidden;
+    }
+    .claw{ position:absolute; inset:auto -20px -20px auto; width:180px; opacity:0.15; filter:contrast(1.2);}
+    h1{ margin:0; font-size: 2rem; letter-spacing: 0.5px; text-transform: uppercase; }
+    h2{ border-left: 6px solid var(--accent); padding-left: 10px; text-transform: uppercase; }
+    .grid{ display:grid; grid-template-columns: 1fr; gap: 20px; }
+    @media (min-width: 900px){ .grid{ grid-template-columns: 1fr 1fr; }}
+    .card{
+      background:#111; border:1px solid #222; border-radius: 8px; padding:16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+    }
+    .badge{ display:inline-block; background:var(--accent); color:#fff; padding:6px 10px; border-radius: 999px; font-weight:700; letter-spacing: 0.5px; }
+    ul{ margin: 8px 0 0 18px; }
+    a{ color: #79b8ff; }
+    footer{ opacity:0.85; font-size: 0.9rem; padding: 24px 0; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header>
+      <h1>{{ cfg.brand_name }} Weekly Newsletter</h1>
+      <img class="claw" src="{{ 'assets/images/panther/header.png' }}" alt="panther claw" />
+    </header>
+    {% block body %}{% endblock %}
+    <footer>
+      <hr style="border-color:#222;" />
+      <div>Panther Pride  Stay fierce.</div>
+    </footer>
+  </div>
+</body>
+</html>

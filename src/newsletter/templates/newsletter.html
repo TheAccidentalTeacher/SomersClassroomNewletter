@@ -1,0 +1,68 @@
+﻿{% extends 'base.html' %}
+{% block body %}
+  <section>
+    <h2>Week: {{ content.week }}</h2>
+    {% if content.date %}<div class="badge">{{ content.date }}</div>{% endif %}
+  </section>
+
+  {% if content.announcements %}
+  <section class="card">
+    <h2>Announcements</h2>
+    <ul>
+      {% for a in content.announcements %}
+        <li>{{ a }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  <div class="grid">
+    <section class="card">
+      <h2>6th Grade</h2>
+      <ul>
+        {% for item in content.grade6 %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+    <section class="card">
+      <h2>7th Grade</h2>
+      <ul>
+        {% for item in content.grade7 %}
+          <li>{{ item }}</li>
+        {% endfor %}
+      </ul>
+    </section>
+  </div>
+
+  <section class="card">
+    <h2>8th Grade</h2>
+    <ul>
+      {% for item in content.grade8 %}
+        <li>{{ item }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+
+  {% if content.achievements %}
+  <section class="card">
+    <h2>Achievements</h2>
+    <ul>
+      {% for a in content.achievements %}
+        <li>{{ a }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+
+  {% if content.events %}
+  <section class="card">
+    <h2>Upcoming Events</h2>
+    <ul>
+      {% for e in content.events %}
+        <li>{{ e.date }}  {{ e.title }}</li>
+      {% endfor %}
+    </ul>
+  </section>
+  {% endif %}
+{% endblock %}
