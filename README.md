@@ -37,3 +37,5 @@ Setup steps:
 4. Set any API keys in Site settings → Environment variables (optional for now).
 
 After deploy, your site will serve the generated newsletter at `/index.html` with images from `/assets/...`.
+
+![CI](https://github.com/<your-username>/SomersClassroomNewletter/actions/workflows/ci.yml/badge.svg)
