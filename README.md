@@ -1,4 +1,4 @@
-# SomersClassroomNewletter
+﻿# SomersClassroomNewletter
 
 ## Getting Started
 
@@ -32,10 +32,11 @@ Publish directory: `out/`
 
 Setup steps:
 1. Push this repo to GitHub.
-2. In Netlify, New site from Git → pick this repo.
+2. In Netlify, New site from Git â†’ pick this repo.
 3. Use defaults (Netlify reads `netlify.toml`).
-4. Set any API keys in Site settings → Environment variables (optional for now).
+4. Set any API keys in Site settings â†’ Environment variables (optional for now).
 
 After deploy, your site will serve the generated newsletter at `/index.html` with images from `/assets/...`.
 
-![CI](https://github.com/<your-username>/SomersClassroomNewletter/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/TheAccidentalTeacher/SomersClassroomNewletter/actions/workflows/ci.yml/badge.svg)
+
