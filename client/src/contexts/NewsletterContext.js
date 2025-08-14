@@ -11,7 +11,7 @@ export const useNewsletter = () => {
 };
 
 export const NewsletterProvider = ({ children }) => {
-  const [newsletters, setNewsletters] = useState([]);
+  const [newsletters] = useState([]);
   const [currentNewsletter, setCurrentNewsletter] = useState(null);
 
   const createNewsletter = (newsletterData) => {
