@@ -152,8 +152,8 @@ class DebugLogger {
         height: window.innerHeight
       },
       screen: {
-        width: screen.width,
-        height: screen.height
+        width: window.screen.width,
+        height: window.screen.height
       },
       location: {
         href: window.location.href,
