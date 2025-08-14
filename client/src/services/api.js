@@ -1,4 +1,6 @@
 // API service that uses Railway environment variables
+import debugLogger from '../utils/debugLogger';
+
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api'  // Railway serves API at /api in production
   : 'http://localhost:5000/api';
@@ -6,10 +8,13 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    debugLogger.info(`API Service initialized with base URL: ${this.baseURL}`);
   }
 
   async request(endpoint, options = {}) {
     const url = `${this.baseURL}${endpoint}`;
+    const startTime = performance.now();
+    
     const config = {
       headers: {
         'Content-Type': 'application/json',
@@ -23,22 +28,40 @@ class ApiService {
       config.body = JSON.stringify(config.body);
     }
 
+    debugLogger.api(`Starting ${config.method || 'GET'} request to ${endpoint}`, {
+      url,
+      method: config.method || 'GET',
+      headers: config.headers,
+      body: config.body ? JSON.parse(config.body) : null
+    });
+
     try {
       const response = await fetch(url, config);
+      const duration = performance.now() - startTime;
       
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
-        throw new Error(errorData.error?.message || `HTTP ${response.status}`);
+        const error = new Error(errorData.error?.message || `HTTP ${response.status}`);
+        
+        debugLogger.trackAPICall(endpoint, config.method || 'GET', response.status, duration, null, error);
+        throw error;
       }
 
       const contentType = response.headers.get('content-type');
+      let responseData;
+      
       if (contentType && contentType.includes('application/json')) {
-        return await response.json();
+        responseData = await response.json();
+      } else {
+        responseData = response;
       }
       
-      return response;
+      debugLogger.trackAPICall(endpoint, config.method || 'GET', response.status, duration, responseData);
+      return responseData;
     } catch (error) {
-      console.error('API request failed:', error);
+      const duration = performance.now() - startTime;
+      debugLogger.trackAPICall(endpoint, config.method || 'GET', 0, duration, null, error);
+      debugLogger.error('API request failed:', error);
       throw error;
     }
   }
