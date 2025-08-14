@@ -1,0 +1,30 @@
+{
+  "name": "somers-classroom-newsletter",
+  "version": "1.0.0",
+  "description": "Dynamic classroom newsletter generator for teachers",
+  "main": "server/index.js",
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=9.0.0"
+  },
+  "scripts": {
+    "build": "npm run build:client && npm run build:server",
+    "build:client": "cd client && npm install && npm run build",
+    "build:server": "cd server && npm install",
+    "start": "cd server && npm start",
+    "dev": "concurrently \"npm run server\" \"npm run client\"",
+    "server": "cd server && npm run dev",
+    "client": "cd client && npm start",
+    "install-all": "npm install && cd server && npm install && cd ../client && npm install"
+  },
+  "keywords": ["newsletter", "education", "classroom", "teacher", "ai"],
+  "author": "Mr. Somers",
+  "license": "PRIVATE",
+  "devDependencies": {
+    "concurrently": "^8.2.2"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TheAccidentalTeacher/SomersClassroomNewletter.git"
+  }
+}
