@@ -131,8 +131,11 @@ class User {
      */
     static async authenticate(email, password) {
         try {
+            console.log('🔍 Authentication attempt for:', email);
+            
             const user = await this.findByEmail(email);
             if (!user) {
+                console.log('❌ User not found:', email);
                 // Log failed attempt
                 await this.logActivity(null, 'login_failed', 'auth', null, {
                     email,
@@ -141,8 +144,11 @@ class User {
                 return null;
             }
 
+            console.log('✅ User found:', { email: user.email, hasPasswordHash: !!user.passwordHash });
+            
             // Check password
             const isValidPassword = await bcrypt.compare(password, user.passwordHash);
+            console.log('🔐 Password check result:', isValidPassword);
             if (!isValidPassword) {
                 // Log failed attempt
                 await this.logActivity(user.id, 'login_failed', 'auth', user.id, {
