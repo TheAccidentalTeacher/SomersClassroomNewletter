@@ -205,6 +205,12 @@ router.post('/login',
 
             const { email, password } = req.body;
 
+            // Debug: Log what we received
+            console.log('Login request body:', req.body);
+            console.log('Email:', email);
+            console.log('Password type:', typeof password);
+            console.log('Password defined:', password !== undefined);
+
             // Authenticate user
             const user = await User.authenticate(email, password);
             if (!user) {

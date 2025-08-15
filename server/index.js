@@ -257,6 +257,7 @@ const corsOptions = {
     const allowedOrigins = [
       'http://localhost:3000',
       'http://localhost:3001',
+      'https://somersclassroomnewletter-production.up.railway.app',
       process.env.RAILWAY_STATIC_URL,
       process.env.FRONTEND_URL
     ].filter(Boolean);
