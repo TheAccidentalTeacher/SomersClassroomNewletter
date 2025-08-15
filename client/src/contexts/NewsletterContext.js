@@ -27,12 +27,16 @@ export const NewsletterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
+      console.log('fetchNewsletters: Starting API call');
+      
       const queryParams = new URLSearchParams();
       if (options.status) queryParams.append('status', options.status);
       if (options.limit) queryParams.append('limit', options.limit);
       if (options.offset) queryParams.append('offset', options.offset);
 
+      console.log('fetchNewsletters: Making API call with', queryParams.toString());
       const response = await api.get(`/newsletters?${queryParams.toString()}`);
+      console.log('fetchNewsletters: API response received', response);
 
       if (response.data.success) {
         setNewsletters(response.data.data.newsletters);
@@ -42,6 +46,7 @@ export const NewsletterProvider = ({ children }) => {
         throw new Error(response.data.message || 'Failed to fetch newsletters');
       }
     } catch (err) {
+      console.error('fetchNewsletters: Error occurred', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch newsletters';
       setError(errorMessage);
       throw err;
