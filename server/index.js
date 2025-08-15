@@ -177,6 +177,11 @@ app.use('/api/images', require('./routes/images'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/admin', require('./routes/admin'));
 
+// Simple health check for Railway
+app.get('/health', (req, res) => {
+  res.status(200).json({ status: 'OK', message: 'Server is running' });
+});
+
 // Health check endpoint with detailed information
 app.get('/api/health', async (req, res) => {
   try {
