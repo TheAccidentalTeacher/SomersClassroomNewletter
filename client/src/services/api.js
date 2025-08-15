@@ -3,7 +3,7 @@ import debugLogger from '../utils/debugLogger';
 
 const API_BASE_URL = process.env.NODE_ENV === 'production' 
   ? '/api'  // Railway serves API at /api in production
-  : 'http://localhost:5000/api';
+  : 'http://localhost:3000/api';
 
 class ApiService {
   constructor() {
