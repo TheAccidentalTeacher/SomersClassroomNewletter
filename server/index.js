@@ -5,7 +5,7 @@ const rateLimit = require('express-rate-limit');
 const path = require('path');
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const PORT = process.env.PORT || 3000; // Changed from 5000 to 3000 (Railway default)
 
 // Validate required environment variables
 const requiredEnvVars = [
@@ -19,10 +19,10 @@ if (missingEnvVars.length > 0) {
   console.warn('⚠️  Missing environment variables:', missingEnvVars);
   console.warn('⚠️  Some features will be disabled until these are configured.');
   
-  // Only exit in production if DATABASE_URL is missing (critical for functionality)
-  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
-    console.error('❌ DATABASE_URL is required in production');
-    process.exit(1);
+  // In production, warn but don't exit - let Railway configure the database first
+  if (process.env.NODE_ENV === 'production') {
+    console.warn('🔧 Running in setup mode - add environment variables in Railway dashboard');
+    console.warn('📋 Required: DATABASE_URL, OPENAI_API_KEY, REPLICATE_API_TOKEN');
   }
 }
 
@@ -140,8 +140,10 @@ app.use('/api/*', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
+app.listen(PORT, '0.0.0.0', () => {
   console.log(`🚀 Newsletter server running on port ${PORT}`);
   console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
   console.log(`🔗 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
+  console.log(`🌐 Railway PORT env: ${process.env.PORT || 'not set'}`);
+  console.log(`📡 Server listening on 0.0.0.0:${PORT}`);
 });
