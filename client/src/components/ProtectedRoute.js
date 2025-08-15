@@ -26,7 +26,7 @@ const ProtectedRoute = ({ children, requireAdmin = false }) => {
   }
 
   // Check admin requirement
-  if (requireAdmin && user?.role !== 'admin') {
+  if (requireAdmin && !user?.isAdmin) {
     return (
       <div style={{ 
         padding: '2rem', 
