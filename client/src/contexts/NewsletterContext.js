@@ -29,12 +29,12 @@ export const NewsletterProvider = ({ children }) => {
       
       const response = await api.getNewsletters(options);
 
-      if (response.data.success) {
-        setNewsletters(response.data.data.newsletters);
-        setStats(response.data.data.stats);
-        return response.data.data;
+      if (response.success) {
+        setNewsletters(response.data.newsletters);
+        setStats(response.data.stats);
+        return response.data;
       } else {
-        throw new Error(response.data.message || 'Failed to fetch newsletters');
+        throw new Error(response.message || 'Failed to fetch newsletters');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch newsletters';
@@ -48,15 +48,15 @@ export const NewsletterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await api.post('/newsletters', newsletterData);
+      const response = await api.createNewsletter(newsletterData);
 
-      if (response.data.success) {
-        const newNewsletter = response.data.data.newsletter;
+      if (response.success) {
+        const newNewsletter = response.data.newsletter;
         setNewsletters(prev => [newNewsletter, ...prev]);
         setCurrentNewsletter(newNewsletter);
         return newNewsletter;
       } else {
-        throw new Error(response.data.message || 'Failed to create newsletter');
+        throw new Error(response.message || 'Failed to create newsletter');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to create newsletter';
@@ -72,10 +72,10 @@ export const NewsletterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await api.put(`/newsletters/${id}`, updateData);
+      const response = await api.updateNewsletter(id, updateData);
 
-      if (response.data.success) {
-        const updatedNewsletter = response.data.data.newsletter;
+      if (response.success) {
+        const updatedNewsletter = response.data.newsletter;
         
         setNewsletters(prev => 
           prev.map(newsletter => 
@@ -89,7 +89,7 @@ export const NewsletterProvider = ({ children }) => {
         
         return updatedNewsletter;
       } else {
-        throw new Error(response.data.message || 'Failed to update newsletter');
+        throw new Error(response.message || 'Failed to update newsletter');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to update newsletter';
@@ -105,9 +105,9 @@ export const NewsletterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await api.delete(`/newsletters/${id}`);
+      const response = await api.deleteNewsletter(id);
 
-      if (response.data.success) {
+      if (response.success) {
         setNewsletters(prev => prev.filter(newsletter => newsletter.id !== id));
         
         if (currentNewsletter && currentNewsletter.id === id) {
@@ -116,7 +116,7 @@ export const NewsletterProvider = ({ children }) => {
         
         return true;
       } else {
-        throw new Error(response.data.message || 'Failed to delete newsletter');
+        throw new Error(response.message || 'Failed to delete newsletter');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to delete newsletter';
@@ -134,12 +134,12 @@ export const NewsletterProvider = ({ children }) => {
 
       const response = await api.getNewsletter(id);
 
-      if (response.data.success) {
-        const newsletter = response.data.data.newsletter;
+      if (response.success) {
+        const newsletter = response.data.newsletter;
         setCurrentNewsletter(newsletter);
         return newsletter;
       } else {
-        throw new Error(response.data.message || 'Failed to fetch newsletter');
+        throw new Error(response.message || 'Failed to fetch newsletter');
       }
     } catch (err) {
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch newsletter';
