@@ -27,8 +27,8 @@ export const AuthProvider = ({ children }) => {
           
           // Verify token is still valid by calling getCurrentUser
           const response = await api.getCurrentUser();
-          if (response.success) {
-            setUser(response.user);
+          if (response.success && response.data) {
+            setUser(response.data.user);
             setIsAuthenticated(true);
           } else {
             // Token invalid, clear it
@@ -52,11 +52,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await api.login(credentials);
       
-      if (response.success) {
-        const { user, token } = response;
+      if (response.success && response.data) {
+        const { user, accessToken } = response.data;
         
         // Store token in API service
-        api.setToken(token);
+        api.setToken(accessToken);
         
         // Update state
         setUser(user);
@@ -64,7 +64,7 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true, user };
       } else {
-        return { success: false, message: response.message };
+        return { success: false, message: response.message || 'Login failed' };
       }
     } catch (error) {
       console.error('Login failed:', error);
@@ -82,11 +82,11 @@ export const AuthProvider = ({ children }) => {
       setLoading(true);
       const response = await api.register(userData);
       
-      if (response.success) {
-        const { user, token } = response;
+      if (response.success && response.data) {
+        const { user, accessToken } = response.data;
         
         // Store token in API service
-        api.setToken(token);
+        api.setToken(accessToken);
         
         // Update state
         setUser(user);
@@ -94,7 +94,7 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true, user };
       } else {
-        return { success: false, message: response.message };
+        return { success: false, message: response.message || 'Registration failed' };
       }
     } catch (error) {
       console.error('Registration failed:', error);
