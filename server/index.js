@@ -1,28 +1,79 @@
+/**
+ * Newsletter Generator Server
+ * Professional Express.js server with authentication and database integration
+ */
+
+require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const path = require('path');
 
+// Import our professional modules
+const { DatabaseManager } = require('./config/database');
+const logger = require('./utils/logger');
+
 const app = express();
-const PORT = process.env.PORT || 3000; // Changed from 5000 to 3000 (Railway default)
+const PORT = process.env.PORT || 3000;
 
 // Validate required environment variables
 const requiredEnvVars = [
-  'OPENAI_API_KEY',
+  'DATABASE_URL',
+  'JWT_SECRET',
+  'OPENAI_API_KEY'
+];
+
+const optionalEnvVars = [
   'REPLICATE_API_TOKEN',
-  'DATABASE_URL'
+  'AZURE_AI_API_KEY',
+  'UNSPLASH_ACCESS_KEY',
+  'PEXELS_API_KEY'
 ];
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
+const missingOptionalVars = optionalEnvVars.filter(envVar => !process.env[envVar]);
+
 if (missingEnvVars.length > 0) {
-  console.warn('⚠️  Missing environment variables:', missingEnvVars);
-  console.warn('⚠️  Some features will be disabled until these are configured.');
-  
-  // In production, warn but don't exit - let Railway configure the database first
+  logger.error('Missing required environment variables:', { missing: missingEnvVars });
   if (process.env.NODE_ENV === 'production') {
-    console.warn('🔧 Running in setup mode - add environment variables in Railway dashboard');
-    console.warn('📋 Required: DATABASE_URL, OPENAI_API_KEY, REPLICATE_API_TOKEN');
+    logger.error('Server cannot start without required environment variables');
+    process.exit(1);
+  } else {
+    logger.warn('Running in development mode with missing environment variables');
+  }
+}
+
+if (missingOptionalVars.length > 0) {
+  logger.warn('Missing optional environment variables (some features will be disabled):', { 
+    missing: missingOptionalVars 
+  });
+}
+
+// Initialize database connection
+async function initializeDatabase() {
+  try {
+    const db = DatabaseManager.getInstance();
+    const isHealthy = await db.healthCheck();
+    
+    if (isHealthy) {
+      logger.info('Database connection established successfully');
+      
+      // Log database statistics
+      const stats = await db.getStats();
+      logger.info('Database connection stats:', stats);
+    } else {
+      throw new Error('Database health check failed');
+    }
+  } catch (error) {
+    logger.error('Database initialization failed:', error);
+    
+    if (process.env.NODE_ENV === 'production') {
+      logger.error('Exiting due to database connection failure');
+      process.exit(1);
+    } else {
+      logger.warn('Continuing in development mode without database');
+    }
   }
 }
 
@@ -31,35 +82,91 @@ app.use(helmet({
   contentSecurityPolicy: {
     directives: {
       defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
+      styleSrc: ["'self'", "'unsafe-inline'", "https://fonts.googleapis.com"],
+      fontSrc: ["'self'", "https://fonts.gstatic.com"],
       scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      imgSrc: ["'self'", "data:", "https:", "blob:"],
+      connectSrc: ["'self'", "https://api.openai.com", "https://api.replicate.com"],
     },
   },
 }));
 
-app.use(cors({
-  origin: process.env.NODE_ENV === 'production' 
-    ? process.env.RAILWAY_STATIC_URL || process.env.FRONTEND_URL
-    : 'http://localhost:3000',
-  credentials: true
-}));
+// CORS configuration
+const corsOptions = {
+  origin: function (origin, callback) {
+    // Allow requests with no origin (mobile apps, Postman, etc.)
+    if (!origin) return callback(null, true);
+    
+    const allowedOrigins = [
+      'http://localhost:3000',
+      'http://localhost:3001',
+      process.env.RAILWAY_STATIC_URL,
+      process.env.FRONTEND_URL
+    ].filter(Boolean);
+    
+    if (allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      logger.warn('CORS blocked origin:', { origin });
+      callback(null, false);
+    }
+  },
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization', 'x-requested-with']
+};
+
+app.use(cors(corsOptions));
+
+// Trust proxy for Railway deployment
+app.set('trust proxy', 1);
+
+// Request logging middleware
+app.use((req, res, next) => {
+  const start = Date.now();
+  
+  res.on('finish', () => {
+    const duration = Date.now() - start;
+    logger.logRequest(req, res, `${req.method} ${req.path}`, 'http');
+    
+    if (duration > 1000) {
+      logger.logPerformance(`${req.method} ${req.path}`, duration, {
+        statusCode: res.statusCode
+      });
+    }
+  });
+  
+  next();
+});
 
 // Rate limiting
 const limiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutes
   max: 100, // limit each IP to 100 requests per windowMs
   message: {
-    error: 'Too many requests from this IP, please try again later.'
+    success: false,
+    message: 'Too many requests from this IP, please try again later.',
+    code: 'RATE_LIMIT_EXCEEDED'
   },
   standardHeaders: true,
   legacyHeaders: false,
+  skip: (req) => {
+    // Skip rate limiting for health checks
+    return req.path === '/api/health';
+  }
 });
+
 app.use('/api/', limiter);
 
 // Body parsing middleware
-app.use(express.json({ limit: '10mb' }));
-app.use(express.urlencoded({ extended: true, limit: '10mb' }));
+app.use(express.json({ 
+  limit: '10mb',
+  type: ['application/json', 'text/plain']
+}));
+app.use(express.urlencoded({ 
+  extended: true, 
+  limit: '10mb' 
+}));
 
 // API Routes
 app.use('/api/auth', require('./routes/auth'));
@@ -70,80 +177,157 @@ app.use('/api/images', require('./routes/images'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Health check endpoint
-app.get('/api/health', (req, res) => {
-  res.json({ 
-    status: 'OK', 
-    message: 'Newsletter API is running',
-    timestamp: new Date().toISOString(),
-    environment: process.env.NODE_ENV || 'development'
-  });
+// Health check endpoint with detailed information
+app.get('/api/health', async (req, res) => {
+  try {
+    const health = {
+      status: 'OK',
+      message: 'Newsletter API is running',
+      timestamp: new Date().toISOString(),
+      environment: process.env.NODE_ENV || 'development',
+      version: '1.0.0',
+      services: {
+        database: false,
+        auth: true,
+        api: true
+      }
+    };
+
+    // Check database health
+    try {
+      const db = DatabaseManager.getInstance();
+      health.services.database = await db.healthCheck();
+    } catch (error) {
+      logger.warn('Database health check failed in health endpoint:', error);
+    }
+
+    const statusCode = health.services.database ? 200 : 503;
+    res.status(statusCode).json(health);
+    
+  } catch (error) {
+    logger.error('Health check failed:', error);
+    res.status(503).json({
+      status: 'ERROR',
+      message: 'Health check failed',
+      timestamp: new Date().toISOString()
+    });
+  }
 });
 
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
   const buildPath = path.join(__dirname, '../client/build');
-  console.log('📁 Looking for React build files at:', buildPath);
+  logger.info('Looking for React build files at:', { buildPath });
   
-  // Check if build directory exists
   const fs = require('fs');
   if (fs.existsSync(buildPath)) {
-    console.log('✅ Build directory found, serving static files');
+    logger.info('Build directory found, serving static files');
     app.use(express.static(buildPath));
     
     app.get('*', (req, res) => {
       const indexPath = path.join(buildPath, 'index.html');
-      console.log('📄 Serving index.html from:', indexPath);
       res.sendFile(indexPath);
     });
   } else {
-    console.error('❌ Build directory not found at:', buildPath);
-    console.log('📁 Available files in server directory:', fs.readdirSync(__dirname));
+    logger.error('Build directory not found', { 
+      buildPath,
+      availableFiles: fs.readdirSync(__dirname)
+    });
     
-    // Fallback response
     app.get('*', (req, res) => {
       res.status(503).json({
-        error: 'Application build files not found',
-        message: 'The React build files are missing. Please check the deployment configuration.',
-        buildPath: buildPath
+        success: false,
+        message: 'Application build files not found',
+        code: 'BUILD_NOT_FOUND'
       });
     });
   }
 }
 
-// Error handling middleware
+// Global error handling middleware
 app.use((error, req, res, next) => {
-  console.error('Error:', error);
+  logger.logError(error, {
+    method: req.method,
+    url: req.url,
+    ip: req.ip,
+    userAgent: req.get('User-Agent'),
+    userId: req.user?.id
+  });
   
   const statusCode = error.status || error.statusCode || 500;
   const message = error.message || 'Internal server error';
   
-  res.status(statusCode).json({
-    error: {
-      message,
-      ...(process.env.NODE_ENV === 'development' && { 
-        stack: error.stack,
-        details: error.details 
-      })
-    }
-  });
+  // Don't leak error details in production
+  const response = {
+    success: false,
+    message: process.env.NODE_ENV === 'production' ? 
+      'An internal error occurred' : message,
+    code: error.code || 'INTERNAL_ERROR'
+  };
+
+  // Add stack trace in development
+  if (process.env.NODE_ENV === 'development') {
+    response.details = {
+      stack: error.stack,
+      originalMessage: message
+    };
+  }
+  
+  res.status(statusCode).json(response);
 });
 
 // 404 handler for API routes
 app.use('/api/*', (req, res) => {
+  logger.warn('API endpoint not found', { path: req.path, method: req.method });
   res.status(404).json({ 
-    error: { 
-      message: 'API endpoint not found',
-      path: req.path
-    } 
+    success: false,
+    message: 'API endpoint not found',
+    code: 'ENDPOINT_NOT_FOUND',
+    path: req.path
   });
 });
 
+// Graceful shutdown handler
+async function gracefulShutdown(signal) {
+  logger.info(`Received ${signal}, starting graceful shutdown...`);
+  
+  try {
+    // Close database connections
+    const db = DatabaseManager.getInstance();
+    await db.closeAllConnections();
+    logger.info('Database connections closed');
+    
+    // Close server
+    process.exit(0);
+  } catch (error) {
+    logger.error('Error during graceful shutdown:', error);
+    process.exit(1);
+  }
+}
+
+process.on('SIGTERM', () => gracefulShutdown('SIGTERM'));
+process.on('SIGINT', () => gracefulShutdown('SIGINT'));
+
 // Start server
-app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🚀 Newsletter server running on port ${PORT}`);
-  console.log(`📝 Environment: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔗 Database: ${process.env.DATABASE_URL ? 'Connected' : 'Not configured'}`);
-  console.log(`🌐 Railway PORT env: ${process.env.PORT || 'not set'}`);
-  console.log(`📡 Server listening on 0.0.0.0:${PORT}`);
-});
+async function startServer() {
+  try {
+    // Initialize database first
+    await initializeDatabase();
+    
+    app.listen(PORT, '0.0.0.0', () => {
+      logger.info('Newsletter server started successfully', {
+        port: PORT,
+        environment: process.env.NODE_ENV || 'development',
+        databaseConfigured: !!process.env.DATABASE_URL,
+        railwayPort: process.env.PORT || 'not set'
+      });
+    });
+    
+  } catch (error) {
+    logger.error('Failed to start server:', error);
+    process.exit(1);
+  }
+}
+
+// Start the server
+startServer();
