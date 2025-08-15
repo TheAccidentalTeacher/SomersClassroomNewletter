@@ -185,6 +185,41 @@ async function ensureSchemaPatches(db) {
       );
     }
 
+    // 3) Fix Mr. Somers password hash if it's incorrect
+    const userCheck = await db.query(
+      `SELECT password_hash FROM users WHERE email = $1`,
+      ['mr.somers@school.edu']
+    );
+    
+    if (userCheck.rows.length > 0) {
+      const currentHash = userCheck.rows[0].password_hash;
+      const correctHash = '$2a$12$rqw3.A7RcdobsIH5UHV4LeWgtpzIiwTBmMDuXB0PdkKCOeR.KFNdO';
+      
+      if (currentHash !== correctHash) {
+        logger.warn('Fixing Mr. Somers password hash');
+        await db.query(
+          `UPDATE users SET password_hash = $1 WHERE email = $2`,
+          [correctHash, 'mr.somers@school.edu']
+        );
+        
+        // Log the fix
+        await db.query(
+          `INSERT INTO activity_logs (action, resource_type, metadata)
+           VALUES ($1, $2, $3)`,
+          [
+            'password_hash_fixed',
+            'system',
+            {
+              user: 'mr.somers@school.edu',
+              reason: 'incorrect_hash_in_init_script',
+              patch_version: '1.0.1'
+            }
+          ]
+        );
+        logger.info('Password hash fixed successfully');
+      }
+    }
+
   } catch (err) {
     // Non-fatal; keep server running
     logger.warn('Schema patches step skipped due to error:', err);

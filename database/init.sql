@@ -202,7 +202,7 @@ INSERT INTO users (
     email_verified
 ) VALUES (
     'mr.somers@school.edu',
-    '$2a$12$LQv3c1yqBwlVHpPjrQXUC.rSC4.GVUqN1p9Z8FGCDCfWvJ7YQZqHu', -- 'admin123' hashed
+    '$2a$12$rqw3.A7RcdobsIH5UHV4LeWgtpzIiwTBmMDuXB0PdkKCOeR.KFNdO', -- 'admin123' hashed correctly
     'Mr. Somers',
     'District School',
     true,
