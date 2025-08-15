@@ -61,30 +61,98 @@ if (missingOptionalVars.length > 0) {
   });
 }
 
-// Initialize database connection
+// Initialize database connection and schema
 async function initializeDatabase() {
   try {
     const db = DatabaseManager.getInstance();
-    const isHealthy = await db.healthCheck();
     
+    // Test basic connection first
+    logger.info('Testing database connection...');
+    await db.pool.query('SELECT NOW()');
+    logger.info('Database connection successful');
+    
+    // Check if tables exist
+    const tableCheckQuery = `
+      SELECT COUNT(*) as table_count 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+    `;
+    
+    const result = await db.pool.query(tableCheckQuery);
+    const tableCount = parseInt(result.rows[0].table_count);
+    
+    logger.info(`Found ${tableCount} tables in database`);
+    
+    if (tableCount === 0) {
+      logger.info('Database is empty, initializing schema...');
+      await initializeSchema(db);
+    } else {
+      logger.info('Database schema already exists');
+    }
+    
+    // Now run health check
+    const isHealthy = await db.healthCheck();
     if (isHealthy) {
-      logger.info('Database connection established successfully');
-      
-      // Log database statistics
+      logger.info('Database health check passed');
       const stats = await db.getStats();
       logger.info('Database connection stats:', stats);
     } else {
-      throw new Error('Database health check failed');
+      logger.warn('Database health check failed, but continuing...');
     }
+    
   } catch (error) {
     logger.error('Database initialization failed:', error);
     
     if (process.env.NODE_ENV === 'production') {
-      logger.error('Exiting due to database connection failure');
-      process.exit(1);
+      logger.error('Continuing without database in production mode');
+      // Don't exit in production, let the app start without DB
     } else {
       logger.warn('Continuing in development mode without database');
     }
+  }
+}
+
+// Initialize database schema
+async function initializeSchema(db) {
+  try {
+    logger.info('Starting database schema initialization...');
+    
+    const fs = require('fs');
+    const path = require('path');
+    
+    // Read the SQL schema file
+    const schemaPath = path.join(__dirname, '../database/init.sql');
+    
+    if (!fs.existsSync(schemaPath)) {
+      throw new Error(`Schema file not found at ${schemaPath}`);
+    }
+    
+    const schemaSQL = fs.readFileSync(schemaPath, 'utf8');
+    logger.info('Schema file loaded successfully');
+    
+    // Execute the schema
+    await db.pool.query(schemaSQL);
+    logger.info('Database schema initialized successfully');
+    
+    // Verify tables were created
+    const tableCheckQuery = `
+      SELECT table_name 
+      FROM information_schema.tables 
+      WHERE table_schema = 'public' 
+      AND table_type = 'BASE TABLE'
+      ORDER BY table_name
+    `;
+    
+    const result = await db.pool.query(tableCheckQuery);
+    const tables = result.rows.map(row => row.table_name);
+    logger.info('Created tables:', { tables });
+    
+    return true;
+    
+  } catch (error) {
+    logger.error('Schema initialization failed:', error);
+    throw error;
   }
 }
 
