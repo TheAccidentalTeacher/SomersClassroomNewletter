@@ -200,7 +200,7 @@ async function initializeSchema(db) {
     const path = require('path');
     
     // Read the SQL schema file
-    const schemaPath = path.join(__dirname, '../database/init.sql');
+    const schemaPath = path.join(__dirname, './database/init.sql');
     
     if (!fs.existsSync(schemaPath)) {
       throw new Error(`Schema file not found at ${schemaPath}`);
