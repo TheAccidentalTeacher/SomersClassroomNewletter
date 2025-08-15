@@ -17,6 +17,9 @@ RUN npm ci --only=production
 # Copy server files
 COPY server/ ./
 
+# Copy database schema files
+COPY database/ ./database/
+
 # Copy built client files
 COPY --from=client-build /app/client/build ./public
 
