@@ -66,10 +66,15 @@ async function initializeDatabase() {
   try {
     const db = DatabaseManager.getInstance();
     
-    // Test basic connection first
+    // Initialize the database connection first
+    logger.info('Initializing database connection...');
+    await db.initialize();
+    logger.info('Database manager initialized');
+    
+    // Test basic connection
     logger.info('Testing database connection...');
-    await db.pool.query('SELECT NOW()');
-    logger.info('Database connection successful');
+    const testResult = await db.query('SELECT NOW() as current_time');
+    logger.info('Database connection successful:', { time: testResult.rows[0].current_time });
     
     // Check if tables exist
     const tableCheckQuery = `
@@ -79,7 +84,7 @@ async function initializeDatabase() {
       AND table_type = 'BASE TABLE'
     `;
     
-    const result = await db.pool.query(tableCheckQuery);
+    const result = await db.query(tableCheckQuery);
     const tableCount = parseInt(result.rows[0].table_count);
     
     logger.info(`Found ${tableCount} tables in database`);
@@ -132,7 +137,7 @@ async function initializeSchema(db) {
     logger.info('Schema file loaded successfully');
     
     // Execute the schema
-    await db.pool.query(schemaSQL);
+    await db.query(schemaSQL);
     logger.info('Database schema initialized successfully');
     
     // Verify tables were created
@@ -144,7 +149,7 @@ async function initializeSchema(db) {
       ORDER BY table_name
     `;
     
-    const result = await db.pool.query(tableCheckQuery);
+    const result = await db.query(tableCheckQuery);
     const tables = result.rows.map(row => row.table_name);
     logger.info('Created tables:', { tables });
     
