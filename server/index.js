@@ -179,7 +179,8 @@ app.use('/api/admin', require('./routes/admin'));
 
 // Simple health check for Railway
 app.get('/health', (req, res) => {
-  res.status(200).json({ status: 'OK', message: 'Server is running' });
+  logger.info('Health check endpoint hit');
+  res.status(200).json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
 });
 
 // Health check endpoint with detailed information
@@ -230,6 +231,7 @@ if (process.env.NODE_ENV === 'production') {
     app.use(express.static(buildPath));
     
     app.get('*', (req, res) => {
+      logger.info('Catch-all route hit for:', { path: req.path, url: req.url });
       const indexPath = path.join(buildPath, 'index.html');
       res.sendFile(indexPath);
     });
