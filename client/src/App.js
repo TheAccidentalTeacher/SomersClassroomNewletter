@@ -7,6 +7,7 @@ import Home from './pages/Home';
 import Login from './pages/Login';
 import Register from './pages/Register';
 import Dashboard from './pages/Dashboard';
+import TestPage from './pages/TestPage';
 import NewsletterEditor from './pages/NewsletterEditor';
 import Templates from './pages/Templates';
 import AdminPanel from './pages/AdminPanel';
@@ -59,7 +60,7 @@ function App() {
                   path="/dashboard" 
                   element={
                     <ProtectedRoute>
-                      <Dashboard />
+                      <TestPage />
                     </ProtectedRoute>
                   } 
                 />
