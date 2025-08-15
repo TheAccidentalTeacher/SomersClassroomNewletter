@@ -1,6 +1,10 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import api from '../services/api';
 
+console.log('NewsletterContext: Imported api object:', api);
+console.log('NewsletterContext: api.get method:', typeof api.get);
+console.log('NewsletterContext: api properties:', Object.keys(api));
+
 const NewsletterContext = createContext();
 
 export const useNewsletter = () => {
@@ -28,6 +32,9 @@ export const NewsletterProvider = ({ children }) => {
       setError(null);
 
       console.log('fetchNewsletters: Starting API call');
+      console.log('fetchNewsletters: api object is:', api);
+      console.log('fetchNewsletters: api.get is:', typeof api.get);
+      console.log('fetchNewsletters: api properties:', Object.keys(api));
       
       const queryParams = new URLSearchParams();
       if (options.status) queryParams.append('status', options.status);
