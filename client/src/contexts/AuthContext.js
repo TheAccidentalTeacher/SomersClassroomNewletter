@@ -22,25 +22,23 @@ export const AuthProvider = ({ children }) => {
       try {
         const token = localStorage.getItem('authToken');
         if (token) {
-          // Set token in API headers
-          api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+          // Set token in API service
+          api.setToken(token);
           
-          // Verify token is still valid
-          const response = await api.get('/auth/me');
-          if (response.data.success) {
-            setUser(response.data.user);
+          // Verify token is still valid by calling getCurrentUser
+          const response = await api.getCurrentUser();
+          if (response.success) {
+            setUser(response.user);
             setIsAuthenticated(true);
           } else {
             // Token invalid, clear it
-            localStorage.removeItem('authToken');
-            delete api.defaults.headers.common['Authorization'];
+            api.setToken(null);
           }
         }
       } catch (error) {
         console.error('Auth initialization failed:', error);
         // Clear invalid token
-        localStorage.removeItem('authToken');
-        delete api.defaults.headers.common['Authorization'];
+        api.setToken(null);
       } finally {
         setLoading(false);
       }
@@ -52,16 +50,13 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setLoading(true);
-      const response = await api.post('/auth/login', credentials);
+      const response = await api.login(credentials);
       
-      if (response.data.success) {
-        const { user, token } = response.data;
+      if (response.success) {
+        const { user, token } = response;
         
-        // Store token
-        localStorage.setItem('authToken', token);
-        
-        // Set token in API headers
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Store token in API service
+        api.setToken(token);
         
         // Update state
         setUser(user);
@@ -69,13 +64,13 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true, user };
       } else {
-        return { success: false, message: response.data.message };
+        return { success: false, message: response.message };
       }
     } catch (error) {
       console.error('Login failed:', error);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Login failed. Please try again.' 
+        message: error.message || 'Login failed. Please try again.' 
       };
     } finally {
       setLoading(false);
@@ -85,16 +80,13 @@ export const AuthProvider = ({ children }) => {
   const register = async (userData) => {
     try {
       setLoading(true);
-      const response = await api.post('/auth/register', userData);
+      const response = await api.register(userData);
       
-      if (response.data.success) {
-        const { user, token } = response.data;
+      if (response.success) {
+        const { user, token } = response;
         
-        // Store token
-        localStorage.setItem('authToken', token);
-        
-        // Set token in API headers
-        api.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+        // Store token in API service
+        api.setToken(token);
         
         // Update state
         setUser(user);
@@ -102,13 +94,13 @@ export const AuthProvider = ({ children }) => {
         
         return { success: true, user };
       } else {
-        return { success: false, message: response.data.message };
+        return { success: false, message: response.message };
       }
     } catch (error) {
       console.error('Registration failed:', error);
       return { 
         success: false, 
-        message: error.response?.data?.message || 'Registration failed. Please try again.' 
+        message: error.message || 'Registration failed. Please try again.' 
       };
     } finally {
       setLoading(false);
@@ -118,13 +110,12 @@ export const AuthProvider = ({ children }) => {
   const logout = async () => {
     try {
       // Call logout endpoint to invalidate token
-      await api.post('/auth/logout');
+      await api.logout();
     } catch (error) {
       console.error('Logout API call failed:', error);
     } finally {
-      // Clear local state regardless of API call result
-      localStorage.removeItem('authToken');
-      delete api.defaults.headers.common['Authorization'];
+      // Clear token from API service
+      api.setToken(null);
       setUser(null);
       setIsAuthenticated(false);
     }

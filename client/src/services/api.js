@@ -8,7 +8,17 @@ const API_BASE_URL = process.env.NODE_ENV === 'production'
 class ApiService {
   constructor() {
     this.baseURL = API_BASE_URL;
+    this.token = localStorage.getItem('authToken');
     debugLogger.info(`API Service initialized with base URL: ${this.baseURL}`);
+  }
+
+  setToken(token) {
+    this.token = token;
+    if (token) {
+      localStorage.setItem('authToken', token);
+    } else {
+      localStorage.removeItem('authToken');
+    }
   }
 
   async request(endpoint, options = {}) {
@@ -23,6 +33,11 @@ class ApiService {
       credentials: 'include', // Include cookies for authentication
       ...options,
     };
+
+    // Add token to headers if available
+    if (this.token) {
+      config.headers['Authorization'] = `Bearer ${this.token}`;
+    }
 
     if (config.body && typeof config.body === 'object') {
       config.body = JSON.stringify(config.body);
