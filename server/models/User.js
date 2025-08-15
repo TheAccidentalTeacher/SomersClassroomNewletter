@@ -11,6 +11,7 @@ class User {
     constructor(userData) {
         this.id = userData.id;
         this.email = userData.email;
+        this.passwordHash = userData.password_hash; // Add this mapping
         this.displayName = userData.display_name;
         this.school = userData.school;
         this.subjects = userData.subjects || [];
