@@ -1,0 +1,18 @@
+# Nixpacks configuration for Railway
+providers = ["node"]
+
+[start]
+cmd = "npm run build && npm start"
+
+[variables]
+NODE_ENV = "production"
+
+[phases.build]
+cmds = [
+  "npm install",
+  "cd client && npm install && npm run build",
+  "cd ../server && npm install && npm run build"
+]
+
+[phases.start]
+cmd = "cd server && npm start"

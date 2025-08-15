@@ -32,21 +32,14 @@ class DatabaseManager {
     }
 
     try {
-      // Use Railway's auto-generated DATABASE_PUBLIC_URL which has the correct credentials
-      const databaseUrl = process.env.DATABASE_PUBLIC_URL || process.env.DATABASE_URL;
-      
-      if (!databaseUrl) {
-        throw new Error('DATABASE_PUBLIC_URL or DATABASE_URL environment variable is required');
+      if (!process.env.DATABASE_URL) {
+        throw new Error('DATABASE_URL environment variable is required');
       }
 
-      console.log('Database connection using:', databaseUrl.includes('railway.app') ? 'Railway auto-generated credentials' : 'Custom DATABASE_URL');
-
-      // Parse database URL for connection details
+      // Parse DATABASE_URL for connection details
       const connectionConfig = {
-        connectionString: databaseUrl,
-        ssl: { 
-          rejectUnauthorized: false // Railway requires SSL but with self-signed certificates
-        },
+        connectionString: process.env.DATABASE_URL,
+        ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
         max: 20, // maximum number of clients in pool
         idleTimeoutMillis: 30000, // close idle clients after 30 seconds
         connectionTimeoutMillis: 10000, // return an error after 10 seconds if connection could not be established

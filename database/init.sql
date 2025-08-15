@@ -118,7 +118,7 @@ CREATE TABLE IF NOT EXISTS activity_logs (
     -- Constraints
     CONSTRAINT logs_action_not_empty CHECK (length(action) > 0),
     CONSTRAINT logs_resource_type_valid CHECK (
-        resource_type IN ('user', 'newsletter', 'template', 'share', 'export', 'auth')
+        resource_type IN ('user', 'newsletter', 'template', 'share', 'export', 'auth', 'system')
     )
 );
 

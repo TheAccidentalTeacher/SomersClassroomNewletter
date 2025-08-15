@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Somers Classroom Newsletter</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header class="header">
+        <div class="container">
+            <h1 class="logo">📚 Somers Classroom Newsletter</h1>
+            <nav class="nav">
+                <a href="#home" class="nav-link active">Home</a>
+                <a href="#newsletters" class="nav-link">Newsletters</a>
+                <a href="#about" class="nav-link">About</a>
+                <a href="#contact" class="nav-link">Contact</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="home" class="hero">
+            <div class="container">
+                <div class="hero-content">
+                    <h2 class="hero-title">Welcome to Our Classroom Community</h2>
+                    <p class="hero-description">
+                        Stay connected with weekly updates, student achievements, upcoming events, 
+                        and important announcements from our classroom.
+                    </p>
+                    <div class="hero-actions">
+                        <button class="btn btn-primary" onclick="showSubscribeForm()">Subscribe to Newsletter</button>
+                        <button class="btn btn-secondary" onclick="scrollToSection('newsletters')">View Latest Issues</button>
+                    </div>
+                </div>
+                <div class="hero-image">
+                    <div class="newsletter-preview">
+                        <h3>📝 Latest Newsletter</h3>
+                        <p>Week of August 13, 2025</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="newsletters" class="newsletters">
+            <div class="container">
+                <h2 class="section-title">Recent Newsletters</h2>
+                <div class="newsletter-grid" id="newsletterGrid">
+                    <!-- Newsletter items will be populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <section id="about" class="about">
+            <div class="container">
+                <h2 class="section-title">About Our Newsletter</h2>
+                <div class="about-content">
+                    <div class="about-text">
+                        <p>
+                            Our weekly classroom newsletter keeps families informed and engaged with 
+                            everything happening in our learning community. Each issue includes:
+                        </p>
+                        <ul class="feature-list">
+                            <li>📅 Upcoming events and important dates</li>
+                            <li>🏆 Student achievements and celebrations</li>
+                            <li>📚 Learning highlights and curriculum updates</li>
+                            <li>🏠 Home learning suggestions and resources</li>
+                            <li>📢 Important announcements and reminders</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <section id="contact" class="contact">
+            <div class="container">
+                <h2 class="section-title">Get in Touch</h2>
+                <div class="contact-content">
+                    <div class="contact-info">
+                        <h3>Contact Information</h3>
+                        <p>📧 Email: teacher@somersclassroom.edu</p>
+                        <p>📞 Phone: (555) 123-4567</p>
+                        <p>🏫 Room: 205</p>
+                    </div>
+                    <div class="contact-form">
+                        <form id="contactForm">
+                            <input type="text" placeholder="Your Name" required>
+                            <input type="email" placeholder="Your Email" required>
+                            <textarea placeholder="Your Message" rows="4" required></textarea>
+                            <button type="submit" class="btn btn-primary">Send Message</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2025 Somers Classroom Newsletter. All rights reserved.</p>
+        </div>
+    </footer>
+
+    <!-- Subscribe Modal -->
+    <div id="subscribeModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+            <h3>Subscribe to Our Newsletter</h3>
+            <form id="subscribeForm">
+                <input type="text" placeholder="Student Name" required>
+                <input type="email" placeholder="Parent/Guardian Email" required>
+                <button type="submit" class="btn btn-primary">Subscribe</button>
+            </form>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
