@@ -1,10 +1,6 @@
 import React, { createContext, useContext, useState, useCallback } from 'react';
 import api from '../services/api';
 
-console.log('NewsletterContext: Imported api object:', api);
-console.log('NewsletterContext: api.get method:', typeof api.get);
-console.log('NewsletterContext: api properties:', Object.keys(api));
-
 const NewsletterContext = createContext();
 
 export const useNewsletter = () => {
@@ -30,20 +26,8 @@ export const NewsletterProvider = ({ children }) => {
     try {
       setLoading(true);
       setError(null);
-
-      console.log('fetchNewsletters: Starting API call');
-      console.log('fetchNewsletters: api object is:', api);
-      console.log('fetchNewsletters: api.get is:', typeof api.get);
-      console.log('fetchNewsletters: api properties:', Object.keys(api));
       
-      const queryParams = new URLSearchParams();
-      if (options.status) queryParams.append('status', options.status);
-      if (options.limit) queryParams.append('limit', options.limit);
-      if (options.offset) queryParams.append('offset', options.offset);
-
-      console.log('fetchNewsletters: Making API call with', queryParams.toString());
-      const response = await api.get(`/newsletters?${queryParams.toString()}`);
-      console.log('fetchNewsletters: API response received', response);
+      const response = await api.getNewsletters(options);
 
       if (response.data.success) {
         setNewsletters(response.data.data.newsletters);
@@ -53,16 +37,13 @@ export const NewsletterProvider = ({ children }) => {
         throw new Error(response.data.message || 'Failed to fetch newsletters');
       }
     } catch (err) {
-      console.error('fetchNewsletters: Error occurred', err);
       const errorMessage = err.response?.data?.message || err.message || 'Failed to fetch newsletters';
       setError(errorMessage);
       throw err;
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const createNewsletter = useCallback(async (newsletterData) => {
+  }, []);  const createNewsletter = useCallback(async (newsletterData) => {
     try {
       setLoading(true);
       setError(null);
@@ -151,7 +132,7 @@ export const NewsletterProvider = ({ children }) => {
       setLoading(true);
       setError(null);
 
-      const response = await api.get(`/newsletters/${id}`);
+      const response = await api.getNewsletter(id);
 
       if (response.data.success) {
         const newsletter = response.data.data.newsletter;

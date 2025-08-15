@@ -107,8 +107,15 @@ class ApiService {
   }
 
   // Newsletters
-  async getNewsletters() {
-    return this.request('/newsletters');
+  async getNewsletters(options = {}) {
+    const queryParams = new URLSearchParams();
+    if (options.status) queryParams.append('status', options.status);
+    if (options.limit) queryParams.append('limit', options.limit);
+    if (options.offset) queryParams.append('offset', options.offset);
+    
+    const queryString = queryParams.toString();
+    const endpoint = queryString ? `/newsletters?${queryString}` : '/newsletters';
+    return this.request(endpoint);
   }
 
   async getNewsletter(id) {
