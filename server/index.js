@@ -17,6 +17,17 @@ const logger = require('./utils/logger');
 const app = express();
 const PORT = process.env.PORT || 3000;
 
+// CRITICAL: Health check MUST be first, before any middleware
+app.get('/health', (req, res) => {
+  logger.info('Health check endpoint hit - before any middleware');
+  res.status(200).json({ 
+    status: 'OK', 
+    message: 'Server is running',
+    timestamp: new Date().toISOString(),
+    middleware: 'before-all'
+  });
+});
+
 // Validate required environment variables
 const requiredEnvVars = [
   'DATABASE_URL',
@@ -177,12 +188,7 @@ app.use('/api/images', require('./routes/images'));
 app.use('/api/export', require('./routes/export'));
 app.use('/api/admin', require('./routes/admin'));
 
-// Simple health check for Railway
-app.get('/health', (req, res) => {
-  logger.info('Health check endpoint hit');
-  res.status(200).json({ status: 'OK', message: 'Server is running', timestamp: new Date().toISOString() });
-});
-
+// Health check endpoints MUST come before static file serving
 // Health check endpoint with detailed information
 app.get('/api/health', async (req, res) => {
   try {
