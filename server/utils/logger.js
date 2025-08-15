@@ -85,34 +85,39 @@ transports.push(
 
 // File transports (only in production or when LOG_TO_FILE is true)
 if (process.env.NODE_ENV === 'production' || process.env.LOG_TO_FILE === 'true') {
-    const logDir = process.env.LOG_DIR || path.join(__dirname, '../../logs');
+    const logDir = process.env.LOG_DIR || path.join(__dirname, '../logs');
     
     // Ensure logs directory exists
     const fs = require('fs');
-    if (!fs.existsSync(logDir)) {
-        fs.mkdirSync(logDir, { recursive: true });
+    try {
+        if (!fs.existsSync(logDir)) {
+            fs.mkdirSync(logDir, { recursive: true });
+        }
+
+        // Error log file
+        transports.push(
+            new winston.transports.File({
+                filename: path.join(logDir, 'error.log'),
+                level: 'error',
+                format: fileFormat,
+                maxsize: 5242880, // 5MB
+                maxFiles: 5
+            })
+        );
+
+        // Combined log file
+        transports.push(
+            new winston.transports.File({
+                filename: path.join(logDir, 'combined.log'),
+                format: fileFormat,
+                maxsize: 5242880, // 5MB
+                maxFiles: 5
+            })
+        );
+    } catch (error) {
+        // If we can't create log files, just log to console
+        console.warn('Unable to create log directory, falling back to console only:', error.message);
     }
-
-    // Error log file
-    transports.push(
-        new winston.transports.File({
-            filename: path.join(logDir, 'error.log'),
-            level: 'error',
-            format: fileFormat,
-            maxsize: 5242880, // 5MB
-            maxFiles: 5
-        })
-    );
-
-    // Combined log file
-    transports.push(
-        new winston.transports.File({
-            filename: path.join(logDir, 'combined.log'),
-            format: fileFormat,
-            maxsize: 5242880, // 5MB
-            maxFiles: 5
-        })
-    );
 }
 
 // Create the logger
