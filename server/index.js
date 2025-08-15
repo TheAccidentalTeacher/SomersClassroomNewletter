@@ -16,8 +16,12 @@ const requiredEnvVars = [
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 if (missingEnvVars.length > 0) {
-  console.error('Missing required environment variables:', missingEnvVars);
-  if (process.env.NODE_ENV === 'production') {
+  console.warn('⚠️  Missing environment variables:', missingEnvVars);
+  console.warn('⚠️  Some features will be disabled until these are configured.');
+  
+  // Only exit in production if DATABASE_URL is missing (critical for functionality)
+  if (process.env.NODE_ENV === 'production' && !process.env.DATABASE_URL) {
+    console.error('❌ DATABASE_URL is required in production');
     process.exit(1);
   }
 }
@@ -78,11 +82,33 @@ app.get('/api/health', (req, res) => {
 
 // Serve static files from React build in production
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../client/build')));
+  const buildPath = path.join(__dirname, '../client/build');
+  console.log('📁 Looking for React build files at:', buildPath);
   
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/build/index.html'));
-  });
+  // Check if build directory exists
+  const fs = require('fs');
+  if (fs.existsSync(buildPath)) {
+    console.log('✅ Build directory found, serving static files');
+    app.use(express.static(buildPath));
+    
+    app.get('*', (req, res) => {
+      const indexPath = path.join(buildPath, 'index.html');
+      console.log('📄 Serving index.html from:', indexPath);
+      res.sendFile(indexPath);
+    });
+  } else {
+    console.error('❌ Build directory not found at:', buildPath);
+    console.log('📁 Available files in server directory:', fs.readdirSync(__dirname));
+    
+    // Fallback response
+    app.get('*', (req, res) => {
+      res.status(503).json({
+        error: 'Application build files not found',
+        message: 'The React build files are missing. Please check the deployment configuration.',
+        buildPath: buildPath
+      });
+    });
+  }
 }
 
 // Error handling middleware
