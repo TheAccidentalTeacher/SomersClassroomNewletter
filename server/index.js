@@ -372,35 +372,33 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// Serve static files from React build in production
-if (process.env.NODE_ENV === 'production') {
-  const buildPath = path.join(__dirname, '../client/build');
-  logger.info('Looking for React build files at:', { buildPath });
+// Serve static files from React build
+const buildPath = path.join(__dirname, 'public');
+logger.info('Looking for React build files at:', { buildPath });
+
+const fs = require('fs');
+if (fs.existsSync(buildPath)) {
+  logger.info('Build directory found, serving static files');
+  app.use(express.static(buildPath));
   
-  const fs = require('fs');
-  if (fs.existsSync(buildPath)) {
-    logger.info('Build directory found, serving static files');
-    app.use(express.static(buildPath));
-    
-    app.get('*', (req, res) => {
-      logger.info('Catch-all route hit for:', { path: req.path, url: req.url });
-      const indexPath = path.join(buildPath, 'index.html');
-      res.sendFile(indexPath);
+  app.get('*', (req, res) => {
+    logger.info('Catch-all route hit for:', { path: req.path, url: req.url });
+    const indexPath = path.join(buildPath, 'index.html');
+    res.sendFile(indexPath);
+  });
+} else {
+  logger.error('Build directory not found', { 
+    buildPath,
+    availableFiles: fs.readdirSync(__dirname)
+  });
+  
+  app.get('*', (req, res) => {
+    res.status(503).json({
+      success: false,
+      message: 'Application build files not found',
+      code: 'BUILD_NOT_FOUND'
     });
-  } else {
-    logger.error('Build directory not found', { 
-      buildPath,
-      availableFiles: fs.readdirSync(__dirname)
-    });
-    
-    app.get('*', (req, res) => {
-      res.status(503).json({
-        success: false,
-        message: 'Application build files not found',
-        code: 'BUILD_NOT_FOUND'
-      });
-    });
-  }
+  });
 }
 
 // Global error handling middleware
