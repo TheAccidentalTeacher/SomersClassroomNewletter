@@ -17,7 +17,13 @@
     "client": "cd client && npm start",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
-  "keywords": ["newsletter", "education", "classroom", "teacher", "ai"],
+  "keywords": [
+    "newsletter",
+    "education",
+    "classroom",
+    "teacher",
+    "ai"
+  ],
   "author": "Mr. Somers",
   "license": "PRIVATE",
   "devDependencies": {

@@ -92,7 +92,77 @@ router.post('/',
         });
       }
       
-      const newsletter = await Newsletter.create(req.body, req.user.id);
+      // If no content provided, create default structured content
+      const newsletterData = { ...req.body };
+      if (!newsletterData.content || Object.keys(newsletterData.content).length === 0) {
+        newsletterData.content = {
+          version: '1.0',
+          sections: [
+            {
+              id: `section-${Date.now()}-title`,
+              type: 'title',
+              order: 0,
+              data: {
+                title: newsletterData.title || 'Newsletter Title',
+                subtitle: '',
+                style: {
+                  fontSize: '2xl',
+                  textAlign: 'center',
+                  color: '#1f2937'
+                }
+              }
+            },
+            {
+              id: `section-${Date.now()}-text`,
+              type: 'richText',
+              order: 1,
+              data: {
+                content: 'Welcome to this week\'s newsletter! Add your content here...',
+                style: {
+                  fontSize: 'base',
+                  textAlign: 'left'
+                }
+              }
+            },
+            {
+              id: `section-${Date.now()}-events`,
+              type: 'events',
+              order: 2,
+              data: {
+                title: 'Upcoming Events',
+                events: [
+                  {
+                    id: 1,
+                    date: new Date().toISOString().split('T')[0],
+                    title: 'Sample Event',
+                    description: 'Event description goes here'
+                  }
+                ]
+              }
+            },
+            {
+              id: `section-${Date.now()}-contact`,
+              type: 'contact',
+              order: 3,
+              data: {
+                title: 'Contact Information',
+                teacherName: 'Teacher Name',
+                email: 'teacher@school.edu',
+                phone: '(555) 123-4567',
+                room: 'Room 123',
+                officeHours: 'Mon-Fri 3:00-4:00 PM'
+              }
+            }
+          ],
+          theme: {
+            primaryColor: '#3b82f6',
+            backgroundColor: '#ffffff',
+            fontFamily: 'Inter, sans-serif'
+          }
+        };
+      }
+      
+      const newsletter = await Newsletter.create(newsletterData, req.user.id);
       
       if (newsletter) {
         res.status(201).json({
@@ -272,6 +342,61 @@ router.delete('/:id', async (req, res) => {
       success: false,
       message: 'Internal server error during newsletter deletion',
       code: 'DELETE_ERROR'
+    });
+  }
+});
+
+/**
+ * POST /api/newsletters/:id/duplicate
+ * Duplicate a newsletter
+ */
+router.post('/:id/duplicate', async (req, res) => {
+  try {
+    const { id } = req.params;
+    
+    const original = await Newsletter.findById(id, req.user.id);
+    
+    if (!original) {
+      return res.status(404).json({
+        success: false,
+        message: 'Newsletter not found',
+        code: 'NOT_FOUND'
+      });
+    }
+    
+    // Create duplicate with modified title
+    const duplicateData = {
+      title: `${original.title} (Copy)`,
+      content: original.content,
+      settings: original.settings,
+      status: 'draft',
+      templateId: original.templateId
+    };
+    
+    const duplicate = await Newsletter.create(duplicateData, req.user.id);
+    
+    if (duplicate) {
+      res.status(201).json({
+        success: true,
+        message: 'Newsletter duplicated successfully',
+        data: {
+          newsletter: duplicate.toPublicJSON()
+        }
+      });
+    } else {
+      res.status(500).json({
+        success: false,
+        message: 'Failed to duplicate newsletter',
+        code: 'DUPLICATE_ERROR'
+      });
+    }
+    
+  } catch (error) {
+    logger.error('Error duplicating newsletter:', error);
+    res.status(500).json({
+      success: false,
+      message: 'Internal server error during newsletter duplication',
+      code: 'DUPLICATE_ERROR'
     });
   }
 });

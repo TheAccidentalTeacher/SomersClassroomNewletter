@@ -13,6 +13,7 @@ const Dashboard = () => {
     error, 
     fetchNewsletters, 
     deleteNewsletter,
+    duplicateNewsletter,
     clearError 
   } = useNewsletter();
 
@@ -38,6 +39,15 @@ const Dashboard = () => {
     } catch (err) {
       // Error is handled by context
       console.error('Error deleting newsletter:', err);
+    }
+  };
+
+  const handleDuplicateNewsletter = async (id, title) => {
+    try {
+      await duplicateNewsletter(id);
+      // Success message could be added here
+    } catch (err) {
+      console.error('Error duplicating newsletter:', err);
     }
   };
 
@@ -158,7 +168,7 @@ const Dashboard = () => {
                   <div className="ml-5 w-0 flex-1">
                     <dl>
                       <dt className="text-sm font-medium text-gray-500 truncate">Drafts</dt>
-                      <dd className="text-lg font-medium text-gray-900">{stats.draft || 0}</dd>
+                      <dd className="text-lg font-medium text-gray-900">{stats.drafts || 0}</dd>
                     </dl>
                   </div>
                 </div>
@@ -266,6 +276,12 @@ const Dashboard = () => {
                             className="text-blue-600 hover:text-blue-800 font-medium text-sm"
                           >
                             Edit
+                          </button>
+                          <button
+                            onClick={() => handleDuplicateNewsletter(newsletter.id, newsletter.title)}
+                            className="text-green-600 hover:text-green-800 font-medium text-sm"
+                          >
+                            Duplicate
                           </button>
                           <button
                             onClick={() => handleDeleteNewsletter(newsletter.id)}

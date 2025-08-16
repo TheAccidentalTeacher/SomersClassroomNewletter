@@ -152,19 +152,26 @@ export const NewsletterProvider = ({ children }) => {
 
   const duplicateNewsletter = useCallback(async (id) => {
     try {
-      const original = await getNewsletter(id);
-      const duplicateData = {
-        title: `${original.title} (Copy)`,
-        content: original.content,
-        settings: original.settings,
-        status: 'draft'
-      };
-      
-      return await createNewsletter(duplicateData);
+      setLoading(true);
+      setError(null);
+
+      const response = await api.duplicateNewsletter(id);
+
+      if (response.success) {
+        const duplicate = response.data.newsletter;
+        setNewsletters(prev => [duplicate, ...prev]);
+        return duplicate;
+      } else {
+        throw new Error(response.message || 'Failed to duplicate newsletter');
+      }
     } catch (err) {
+      const errorMessage = err.response?.data?.message || err.message || 'Failed to duplicate newsletter';
+      setError(errorMessage);
       throw err;
+    } finally {
+      setLoading(false);
     }
-  }, [getNewsletter, createNewsletter]);
+  }, []);
 
   const value = {
     // State
