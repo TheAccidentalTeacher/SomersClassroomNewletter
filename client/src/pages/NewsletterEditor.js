@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext';
 import SectionRenderer from '../components/editor/SectionRenderer';
 import SectionToolbar from '../components/editor/SectionToolbar';
 import ThemeControls from '../components/editor/ThemeControls';
+import LayoutControls from '../components/editor/LayoutControls';
 import { createSection, SECTION_TYPES } from '../components/editor/SectionTypes';
 
 const NewsletterEditor = () => {
@@ -30,7 +31,7 @@ const NewsletterEditor = () => {
   const [showSaveAsTemplate, setShowSaveAsTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
-  const [sidebarTab, setSidebarTab] = useState('sections'); // 'sections' or 'theme'
+  const [sidebarTab, setSidebarTab] = useState('sections'); // 'sections', 'theme', or 'layout'
 
   const getDefaultSections = () => [
     createSection(SECTION_TYPES.TITLE, 0),
@@ -344,7 +345,7 @@ const NewsletterEditor = () => {
                 <div className="flex">
                   <button
                     onClick={() => setSidebarTab('sections')}
-                    className={`flex-1 px-4 py-3 text-sm font-medium text-center ${
+                    className={`flex-1 px-3 py-3 text-xs font-medium text-center ${
                       sidebarTab === 'sections'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                         : 'text-gray-500 hover:text-gray-700 bg-gray-50'
@@ -354,13 +355,23 @@ const NewsletterEditor = () => {
                   </button>
                   <button
                     onClick={() => setSidebarTab('theme')}
-                    className={`flex-1 px-4 py-3 text-sm font-medium text-center ${
+                    className={`flex-1 px-3 py-3 text-xs font-medium text-center ${
                       sidebarTab === 'theme'
                         ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
                         : 'text-gray-500 hover:text-gray-700 bg-gray-50'
                     }`}
                   >
                     Theme
+                  </button>
+                  <button
+                    onClick={() => setSidebarTab('layout')}
+                    className={`flex-1 px-3 py-3 text-xs font-medium text-center ${
+                      sidebarTab === 'layout'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                        : 'text-gray-500 hover:text-gray-700 bg-gray-50'
+                    }`}
+                  >
+                    Layout
                   </button>
                 </div>
               </div>
@@ -379,6 +390,18 @@ const NewsletterEditor = () => {
                     />
                   </div>
                 )}
+
+                {sidebarTab === 'layout' && newsletter && (
+                  <div className="p-4">
+                    <LayoutControls
+                      newsletter={newsletter}
+                      onChange={(updatedNewsletter) => {
+                        setNewsletter(updatedNewsletter);
+                        setHasUnsavedChanges(true);
+                      }}
+                    />
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -392,14 +415,27 @@ const NewsletterEditor = () => {
                 fontFamily: newsletter?.content?.theme?.fontFamily || 'Inter, sans-serif'
               }}
             >
-              <div className="max-w-4xl mx-auto p-8">
+              <div 
+                className={`mx-auto ${
+                  newsletter?.settings?.layout?.pageMargins === 'minimal' ? 'px-2' :
+                  newsletter?.settings?.layout?.pageMargins === 'generous' ? 'px-12' : 'px-8'
+                } py-8 ${
+                  newsletter?.settings?.layout?.contentWidth === 'narrow' ? 'max-w-2xl' :
+                  newsletter?.settings?.layout?.contentWidth === 'wide' ? 'max-w-6xl' :
+                  newsletter?.settings?.layout?.contentWidth === 'full' ? 'max-w-full' : 'max-w-4xl'
+                }`}
+              >
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable droppableId="newsletter-sections" isDropDisabled={!isEditing}>
                     {(provided, snapshot) => (
                       <div
                         {...provided.droppableProps}
                         ref={provided.innerRef}
-                        className={`space-y-6 ${snapshot.isDraggingOver ? 'bg-blue-50' : ''}`}
+                        className={`${snapshot.isDraggingOver ? 'bg-blue-50' : ''} ${
+                          newsletter?.settings?.layout?.sectionSpacing === 'tight' ? 'space-y-3' :
+                          newsletter?.settings?.layout?.sectionSpacing === 'loose' ? 'space-y-10' :
+                          newsletter?.settings?.layout?.sectionSpacing === 'extra-loose' ? 'space-y-16' : 'space-y-6'
+                        }`}
                       >
                         {sortedSections.map((section, index) => (
                           <Draggable
