@@ -24,36 +24,6 @@ const NewsletterEditor = () => {
   const [newsletter, setNewsletter] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  // Initialize newsletter content structure
-  const initializeNewsletter = useCallback(() => {
-    if (id && currentNewsletter) {
-      // Editing existing newsletter
-      const content = currentNewsletter.content || {};
-      const sections = content.sections || [];
-      
-      setNewsletter({
-        ...currentNewsletter,
-        content: {
-          version: '1.0',
-          sections: sections.length > 0 ? sections : getDefaultSections(),
-          theme: content.theme || getDefaultTheme()
-        }
-      });
-    } else if (!id) {
-      // Creating new newsletter
-      setNewsletter({
-        title: 'Untitled Newsletter',
-        content: {
-          version: '1.0',
-          sections: getDefaultSections(),
-          theme: getDefaultTheme()
-        },
-        settings: {},
-        status: 'draft'
-      });
-    }
-  }, [id, currentNewsletter]);
-
   const getDefaultSections = () => [
     createSection(SECTION_TYPES.TITLE, 0),
     createSection(SECTION_TYPES.RICH_TEXT, 1),
@@ -72,16 +42,37 @@ const NewsletterEditor = () => {
     if (id) {
       getNewsletter(id);
     } else {
-      initializeNewsletter();
+      // Creating new newsletter - initialize directly
+      setNewsletter({
+        title: 'Untitled Newsletter',
+        content: {
+          version: '1.0',
+          sections: getDefaultSections(),
+          theme: getDefaultTheme()
+        },
+        settings: {},
+        status: 'draft'
+      });
     }
-  }, [id, getNewsletter, initializeNewsletter]);
+  }, [id, getNewsletter]);
 
-  // Initialize newsletter when currentNewsletter changes
+  // Initialize newsletter when currentNewsletter loads (only for existing newsletters)
   useEffect(() => {
-    if (currentNewsletter || !id) {
-      initializeNewsletter();
+    if (id && currentNewsletter && !newsletter) {
+      // Editing existing newsletter
+      const content = currentNewsletter.content || {};
+      const sections = content.sections || [];
+      
+      setNewsletter({
+        ...currentNewsletter,
+        content: {
+          version: '1.0',
+          sections: sections.length > 0 ? sections : getDefaultSections(),
+          theme: content.theme || getDefaultTheme()
+        }
+      });
     }
-  }, [currentNewsletter, initializeNewsletter, id]);
+  }, [id, currentNewsletter, newsletter]);
 
   // Save function with debounce
   const saveNewsletter = useCallback(async () => {
@@ -97,7 +88,7 @@ const NewsletterEditor = () => {
         // Create new
         const created = await createNewsletter(newsletter);
         if (created) {
-          navigate(`/newsletter-editor/${created.id}`, { replace: true });
+          navigate(`/editor/${created.id}`, { replace: true });
         }
       }
       
