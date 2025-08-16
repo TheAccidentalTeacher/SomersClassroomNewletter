@@ -1,6 +1,6 @@
 import React from 'react';
 
-const EventsSection = ({ section, onChange, onDelete, isEditing }) => {
+const EventsSection = ({ section, onChange, onDelete, isEditing, theme }) => {
   const { data } = section;
 
   const handleChange = (field, value) => {
@@ -19,6 +19,16 @@ const EventsSection = ({ section, onChange, onDelete, isEditing }) => {
     handleChange('events', updatedEvents);
   };
 
+  const handleStyleChange = (styleField, value) => {
+    onChange(section.id, {
+      ...data,
+      style: {
+        ...data.style,
+        [styleField]: value
+      }
+    });
+  };
+
   const addEvent = () => {
     const newEvent = {
       id: Date.now(),
@@ -35,14 +45,24 @@ const EventsSection = ({ section, onChange, onDelete, isEditing }) => {
   };
 
   if (!isEditing) {
+    const titleColor = data.style?.titleColor || theme?.primaryColor || '#1f2937';
+    const borderColor = theme?.primaryColor || '#3b82f6';
+    
     return (
       <div className="py-4">
-        <h3 className="text-lg font-semibold mb-4 text-gray-800">
+        <h3 
+          className="text-lg font-semibold mb-4"
+          style={{ color: titleColor }}
+        >
           {data.title}
         </h3>
         <div className="space-y-3">
           {data.events.map((event, index) => (
-            <div key={event.id} className="border-l-4 border-blue-400 pl-4 py-2">
+            <div 
+              key={event.id} 
+              className="border-l-4 pl-4 py-2"
+              style={{ borderLeftColor: borderColor }}
+            >
               <div className="flex items-center justify-between mb-1">
                 <h4 className="font-medium text-gray-900">{event.title}</h4>
                 <span className="text-sm text-gray-500">
@@ -54,6 +74,9 @@ const EventsSection = ({ section, onChange, onDelete, isEditing }) => {
               )}
             </div>
           ))}
+          {data.events.length === 0 && (
+            <p className="text-gray-500 italic">No events scheduled</p>
+          )}
         </div>
       </div>
     );
@@ -82,6 +105,18 @@ const EventsSection = ({ section, onChange, onDelete, isEditing }) => {
             onChange={(e) => handleChange('title', e.target.value)}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-purple-500"
             placeholder="e.g., Upcoming Events"
+          />
+        </div>
+
+        <div>
+          <label className="block text-sm font-medium text-gray-700 mb-1">
+            Title Color
+          </label>
+          <input
+            type="color"
+            value={data.style?.titleColor || theme?.primaryColor || '#1f2937'}
+            onChange={(e) => handleStyleChange('titleColor', e.target.value)}
+            className="w-full h-10 border border-gray-300 rounded-md cursor-pointer"
           />
         </div>
 
