@@ -21,17 +21,23 @@ export const AuthProvider = ({ children }) => {
     const initAuth = async () => {
       try {
         const token = localStorage.getItem('authToken');
+        console.log('AuthContext: Initializing auth, token:', token ? 'found' : 'not found');
+        
         if (token) {
           // Set token in API service
           api.setToken(token);
           
           // Verify token is still valid by calling getCurrentUser
           const response = await api.getCurrentUser();
+          console.log('AuthContext: getCurrentUser response:', response);
+          
           if (response.success && response.data) {
+            console.log('AuthContext: Setting user:', response.data.user);
             setUser(response.data.user);
             setIsAuthenticated(true);
           } else {
             // Token invalid, clear it
+            console.log('AuthContext: Token invalid, clearing');
             api.setToken(null);
           }
         }
@@ -40,6 +46,7 @@ export const AuthProvider = ({ children }) => {
         // Clear invalid token
         api.setToken(null);
       } finally {
+        console.log('AuthContext: Finished loading, setting loading=false');
         setLoading(false);
       }
     };
@@ -50,10 +57,15 @@ export const AuthProvider = ({ children }) => {
   const login = async (credentials) => {
     try {
       setLoading(true);
+      console.log('AuthContext: Starting login...');
       const response = await api.login(credentials);
+      
+      console.log('AuthContext: Login response:', response);
       
       if (response.success && response.data) {
         const { user, accessToken } = response.data;
+        
+        console.log('AuthContext: Login successful, setting user and token');
         
         // Store token in API service
         api.setToken(accessToken);
@@ -61,6 +73,8 @@ export const AuthProvider = ({ children }) => {
         // Update state
         setUser(user);
         setIsAuthenticated(true);
+        
+        console.log('AuthContext: Auth state updated, user:', user.email);
         
         return { success: true, user };
       } else {

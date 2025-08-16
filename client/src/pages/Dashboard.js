@@ -25,11 +25,11 @@ const Dashboard = () => {
   console.log('Dashboard render:', { loading, error, newsletters, stats });
 
   const handleCreateNewsletter = () => {
-    navigate('/newsletter-editor');
+    navigate('/editor');
   };
 
   const handleEditNewsletter = (id) => {
-    navigate(`/newsletter-editor/${id}`);
+    navigate(`/editor/${id}`);
   };
 
   const handleDeleteNewsletter = async (id) => {
