@@ -6,6 +6,7 @@ import { useTemplate } from '../contexts/TemplateContext';
 import { useAuth } from '../contexts/AuthContext';
 import SectionRenderer from '../components/editor/SectionRenderer';
 import SectionToolbar from '../components/editor/SectionToolbar';
+import ThemeControls from '../components/editor/ThemeControls';
 import { createSection, SECTION_TYPES } from '../components/editor/SectionTypes';
 
 const NewsletterEditor = () => {
@@ -29,6 +30,7 @@ const NewsletterEditor = () => {
   const [showSaveAsTemplate, setShowSaveAsTemplate] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
+  const [sidebarTab, setSidebarTab] = useState('sections'); // 'sections' or 'theme'
 
   const getDefaultSections = () => [
     createSection(SECTION_TYPES.TITLE, 0),
@@ -199,6 +201,18 @@ const NewsletterEditor = () => {
     setHasUnsavedChanges(true);
   }, []);
 
+  // Handle theme change
+  const handleThemeChange = useCallback((newTheme) => {
+    setNewsletter(prev => ({
+      ...prev,
+      content: {
+        ...prev.content,
+        theme: newTheme
+      }
+    }));
+    setHasUnsavedChanges(true);
+  }, []);
+
   // Handle save as template
   const handleSaveAsTemplate = useCallback(async () => {
     if (!newsletter) return;
@@ -324,14 +338,60 @@ const NewsletterEditor = () => {
         <div className="flex">
           {/* Sidebar */}
           {isEditing && (
-            <div className="w-80 bg-white shadow-sm">
-              <SectionToolbar onAddSection={handleAddSection} />
+            <div className="w-80 bg-gray-50 shadow-sm">
+              {/* Sidebar Tabs */}
+              <div className="bg-white border-b border-gray-200">
+                <div className="flex">
+                  <button
+                    onClick={() => setSidebarTab('sections')}
+                    className={`flex-1 px-4 py-3 text-sm font-medium text-center ${
+                      sidebarTab === 'sections'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                        : 'text-gray-500 hover:text-gray-700 bg-gray-50'
+                    }`}
+                  >
+                    Sections
+                  </button>
+                  <button
+                    onClick={() => setSidebarTab('theme')}
+                    className={`flex-1 px-4 py-3 text-sm font-medium text-center ${
+                      sidebarTab === 'theme'
+                        ? 'text-blue-600 border-b-2 border-blue-600 bg-white'
+                        : 'text-gray-500 hover:text-gray-700 bg-gray-50'
+                    }`}
+                  >
+                    Theme
+                  </button>
+                </div>
+              </div>
+
+              {/* Sidebar Content */}
+              <div className="h-full overflow-y-auto">
+                {sidebarTab === 'sections' && (
+                  <SectionToolbar onAddSection={handleAddSection} />
+                )}
+                
+                {sidebarTab === 'theme' && newsletter && (
+                  <div className="p-4">
+                    <ThemeControls
+                      theme={newsletter.content.theme || getDefaultTheme()}
+                      onChange={handleThemeChange}
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           )}
 
           {/* Main Editor */}
           <div className={`flex-1 ${isEditing ? 'ml-0' : ''}`}>
-            <div className="bg-white min-h-screen">
+            <div 
+              className="min-h-screen"
+              style={{ 
+                backgroundColor: newsletter?.content?.theme?.backgroundColor || '#ffffff',
+                fontFamily: newsletter?.content?.theme?.fontFamily || 'Inter, sans-serif'
+              }}
+            >
               <div className="max-w-4xl mx-auto p-8">
                 <DragDropContext onDragEnd={handleDragEnd}>
                   <Droppable droppableId="newsletter-sections" isDropDisabled={!isEditing}>
@@ -372,6 +432,7 @@ const NewsletterEditor = () => {
                                   onChange={handleSectionChange}
                                   onDelete={handleSectionDelete}
                                   isEditing={isEditing}
+                                  theme={newsletter.content.theme || getDefaultTheme()}
                                 />
                               </div>
                             )}

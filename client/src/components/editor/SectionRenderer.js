@@ -1,12 +1,13 @@
 import React from 'react';
+import HeaderSection from './HeaderSection';
 import TitleSection from './TitleSection';
 import RichTextSection from './RichTextSection';
 import EventsSection from './EventsSection';
 import ContactSection from './ContactSection';
 import { SECTION_TYPES } from './SectionTypes';
 
-const SectionRenderer = ({ section, onChange, onDelete, isEditing }) => {
-  const props = { section, onChange, onDelete, isEditing };
+const SectionRenderer = ({ section, onChange, onDelete, isEditing, theme }) => {
+  const props = { section, onChange, onDelete, isEditing, theme };
 
   switch (section.type) {
     case SECTION_TYPES.TITLE:

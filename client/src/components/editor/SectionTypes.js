@@ -1,6 +1,7 @@
 // Section type definitions and default content
 
 export const SECTION_TYPES = {
+  HEADER: 'header',
   TITLE: 'title',
   RICH_TEXT: 'richText',
   EVENTS: 'events',
@@ -16,6 +17,23 @@ export const createSection = (type, order = 0) => {
   };
 
   switch (type) {
+    case SECTION_TYPES.HEADER:
+      return {
+        ...baseSection,
+        data: {
+          title: 'STUDENT READING',
+          subtitle: 'Module 12 | 7th Grade Geography',
+          level: 'Standard Level',
+          showNameLine: true,
+          style: {
+            titleFontSize: 'xl',
+            textAlign: 'center',
+            color: '#1f2937',
+            showBorder: true
+          }
+        }
+      };
+
     case SECTION_TYPES.TITLE:
       return {
         ...baseSection,
@@ -91,6 +109,7 @@ export const createSection = (type, order = 0) => {
 };
 
 export const SECTION_LABELS = {
+  [SECTION_TYPES.HEADER]: 'Document Header',
   [SECTION_TYPES.TITLE]: 'Title Section',
   [SECTION_TYPES.RICH_TEXT]: 'Text Content',
   [SECTION_TYPES.EVENTS]: 'Events List',

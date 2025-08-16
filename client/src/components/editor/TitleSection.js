@@ -1,7 +1,10 @@
 import React from 'react';
 
-const TitleSection = ({ section, onChange, onDelete, isEditing }) => {
+const TitleSection = ({ section, onChange, onDelete, isEditing, theme }) => {
   const { data } = section;
+
+  // Use theme primary color as default if no color is set
+  const titleColor = data.style?.color || theme?.primaryColor || '#1f2937';
 
   const handleChange = (field, value) => {
     onChange(section.id, {
@@ -28,7 +31,7 @@ const TitleSection = ({ section, onChange, onDelete, isEditing }) => {
             data.style?.fontSize === '3xl' ? 'text-3xl' :
             data.style?.fontSize === '2xl' ? 'text-2xl' : 'text-xl'
           }`}
-          style={{ color: data.style?.color }}
+          style={{ color: titleColor }}
         >
           {data.title}
         </h1>
@@ -102,7 +105,7 @@ const TitleSection = ({ section, onChange, onDelete, isEditing }) => {
             </label>
             <input
               type="color"
-              value={data.style?.color || '#1f2937'}
+              value={titleColor}
               onChange={(e) => handleStyleChange('color', e.target.value)}
               className="w-full h-10 border border-gray-300 rounded-md cursor-pointer"
             />
