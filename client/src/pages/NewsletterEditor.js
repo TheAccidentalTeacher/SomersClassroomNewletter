@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useNewsletter } from '../contexts/NewsletterContext';
+import { useTemplate } from '../contexts/TemplateContext';
 import { useAuth } from '../contexts/AuthContext';
 import SectionRenderer from '../components/editor/SectionRenderer';
 import SectionToolbar from '../components/editor/SectionToolbar';
@@ -19,10 +20,15 @@ const NewsletterEditor = () => {
     updateNewsletter 
   } = useNewsletter();
 
+  const { createTemplateFromNewsletter } = useTemplate();
+
   const [isEditing, setIsEditing] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newsletter, setNewsletter] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [showSaveAsTemplate, setShowSaveAsTemplate] = useState(false);
+  const [templateName, setTemplateName] = useState('');
+  const [templateDescription, setTemplateDescription] = useState('');
 
   const getDefaultSections = () => [
     createSection(SECTION_TYPES.TITLE, 0),
@@ -193,6 +199,32 @@ const NewsletterEditor = () => {
     setHasUnsavedChanges(true);
   }, []);
 
+  // Handle save as template
+  const handleSaveAsTemplate = useCallback(async () => {
+    if (!newsletter) return;
+
+    try {
+      const templateData = {
+        name: templateName || `${newsletter.title} Template`,
+        description: templateDescription || `Template created from newsletter: ${newsletter.title}`,
+        content: newsletter.content,
+        settings: newsletter.settings || {},
+        isPublic: false
+      };
+
+      await createTemplateFromNewsletter(templateData);
+      setShowSaveAsTemplate(false);
+      setTemplateName('');
+      setTemplateDescription('');
+      
+      // Show success message (you could add a toast here)
+      alert('Template saved successfully!');
+    } catch (error) {
+      console.error('Error saving template:', error);
+      alert('Error saving template. Please try again.');
+    }
+  }, [newsletter, templateName, templateDescription, createTemplateFromNewsletter]);
+
   if (loading && !newsletter) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -266,6 +298,14 @@ const NewsletterEditor = () => {
                 }`}
               >
                 {isEditing ? 'Preview' : 'Edit'}
+              </button>
+
+              <button
+                onClick={() => setShowSaveAsTemplate(true)}
+                disabled={!newsletter}
+                className="bg-purple-600 hover:bg-purple-700 disabled:bg-purple-400 text-white px-4 py-2 rounded-md font-medium"
+              >
+                Save as Template
               </button>
 
               <button
@@ -347,6 +387,79 @@ const NewsletterEditor = () => {
           </div>
         </div>
       </div>
+
+      {/* Save as Template Modal */}
+      {showSaveAsTemplate && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold mb-4">Save as Template</h3>
+            
+            <div className="space-y-4">
+              <div>
+                <label htmlFor="templateName" className="block text-sm font-medium text-gray-700 mb-1">
+                  Template Name *
+                </label>
+                <input
+                  type="text"
+                  id="templateName"
+                  value={templateName}
+                  onChange={(e) => setTemplateName(e.target.value)}
+                  placeholder={`${newsletter?.title || 'Newsletter'} Template`}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div>
+                <label htmlFor="templateDescription" className="block text-sm font-medium text-gray-700 mb-1">
+                  Description (Optional)
+                </label>
+                <textarea
+                  id="templateDescription"
+                  value={templateDescription}
+                  onChange={(e) => setTemplateDescription(e.target.value)}
+                  placeholder={`Template created from newsletter: ${newsletter?.title || 'Newsletter'}`}
+                  rows={3}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              <div className="bg-blue-50 p-3 rounded-md">
+                <div className="text-sm text-blue-800">
+                  <div className="font-medium mb-1">Template will include:</div>
+                  <ul className="text-xs space-y-1">
+                    <li>• {newsletter?.content?.sections?.length || 0} sections</li>
+                    <li>• Current layout and styling</li>
+                    <li>• Section structure and types</li>
+                  </ul>
+                  <div className="mt-2 text-xs text-blue-600">
+                    Template will be saved as private by default.
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end space-x-3 mt-6">
+              <button
+                onClick={() => {
+                  setShowSaveAsTemplate(false);
+                  setTemplateName('');
+                  setTemplateDescription('');
+                }}
+                className="px-4 py-2 text-gray-600 border border-gray-300 rounded hover:bg-gray-50"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleSaveAsTemplate}
+                disabled={!newsletter}
+                className="px-4 py-2 bg-purple-600 text-white rounded hover:bg-purple-700 disabled:bg-purple-400"
+              >
+                Save Template
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

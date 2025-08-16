@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import { NewsletterProvider } from './contexts/NewsletterContext';
+import { TemplateProvider } from './contexts/TemplateContext';
 import Header from './components/Header';
 import Home from './pages/Home';
 import Login from './pages/Login';
@@ -47,50 +48,52 @@ function App() {
   return (
     <AuthProvider>
       <NewsletterProvider>
-        <Router>
-          <div className="App">
-            <Header />
-            <main className="main-content">
-              <Routes>
-                <Route path="/" element={<Home />} />
-                <Route path="/login" element={<Login />} />
-                <Route path="/register" element={<Register />} />
-                <Route 
-                  path="/dashboard" 
-                  element={
-                    <ProtectedRoute>
-                      <Dashboard />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/editor/:id?" 
-                  element={
-                    <ProtectedRoute>
-                      <NewsletterEditor />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/templates" 
-                  element={
-                    <ProtectedRoute>
-                      <Templates />
-                    </ProtectedRoute>
-                  } 
-                />
-                <Route 
-                  path="/admin" 
-                  element={
-                    <ProtectedRoute requireAdmin>
-                      <AdminPanel />
-                    </ProtectedRoute>
-                  } 
-                />
-              </Routes>
-            </main>
-          </div>
-        </Router>
+        <TemplateProvider>
+          <Router>
+            <div className="App">
+              <Header />
+              <main className="main-content">
+                <Routes>
+                  <Route path="/" element={<Home />} />
+                  <Route path="/login" element={<Login />} />
+                  <Route path="/register" element={<Register />} />
+                  <Route 
+                    path="/dashboard" 
+                    element={
+                      <ProtectedRoute>
+                        <Dashboard />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/editor/:id?" 
+                    element={
+                      <ProtectedRoute>
+                        <NewsletterEditor />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/templates" 
+                    element={
+                      <ProtectedRoute>
+                        <Templates />
+                      </ProtectedRoute>
+                    } 
+                  />
+                  <Route 
+                    path="/admin" 
+                    element={
+                      <ProtectedRoute requireAdmin>
+                        <AdminPanel />
+                      </ProtectedRoute>
+                    } 
+                  />
+                </Routes>
+              </main>
+            </div>
+          </Router>
+        </TemplateProvider>
       </NewsletterProvider>
     </AuthProvider>
   );

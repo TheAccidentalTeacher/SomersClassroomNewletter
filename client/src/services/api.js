@@ -156,12 +156,26 @@ class ApiService {
   }
 
   // Templates
-  async getTemplates() {
-    return this.request('/templates');
+  async getTemplates(options = {}) {
+    const params = new URLSearchParams();
+    
+    if (options.limit) params.append('limit', options.limit);
+    if (options.offset) params.append('offset', options.offset);
+    if (options.publicOnly) params.append('public_only', 'true');
+    if (options.myTemplatesOnly) params.append('my_templates_only', 'true');
+    
+    const queryString = params.toString();
+    const endpoint = queryString ? `/templates?${queryString}` : '/templates';
+    
+    return this.request(endpoint);
   }
 
   async getPublicTemplates() {
-    return this.request('/templates/public');
+    return this.request('/templates?public_only=true');
+  }
+
+  async getMyTemplates() {
+    return this.request('/templates?my_templates_only=true');
   }
 
   async getTemplate(id) {
@@ -188,11 +202,23 @@ class ApiService {
     });
   }
 
-  async shareTemplate(id, shareData) {
-    return this.request(`/templates/${id}/share`, {
+  async duplicateTemplate(id) {
+    return this.request(`/templates/${id}/duplicate`, {
       method: 'POST',
-      body: shareData,
     });
+  }
+
+  async createTemplateFromNewsletter(newsletterData) {
+    // Create a template from existing newsletter data
+    const templateData = {
+      name: `${newsletterData.title} Template`,
+      description: `Template created from newsletter: ${newsletterData.title}`,
+      content: newsletterData.content,
+      settings: newsletterData.settings || {},
+      isPublic: false // Default to private
+    };
+    
+    return this.createTemplate(templateData);
   }
 
   // AI Services
