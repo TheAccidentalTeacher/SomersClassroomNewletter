@@ -1,6 +1,6 @@
 import React from 'react';
 
-const HeaderSection = ({ section, onChange, onDelete, isEditing }) => {
+const HeaderSection = ({ section, onChange, onDelete, isEditing, theme }) => {
   const { data } = section;
 
   const handleChange = (field, value) => {
@@ -19,6 +19,9 @@ const HeaderSection = ({ section, onChange, onDelete, isEditing }) => {
       }
     });
   };
+
+  // Use theme primary color as default if no color is set
+  const headerColor = data.style?.color || theme?.primaryColor || '#1f2937';
 
   if (!isEditing) {
     return (
@@ -40,7 +43,7 @@ const HeaderSection = ({ section, onChange, onDelete, isEditing }) => {
               data.style?.titleFontSize === 'xl' ? 'text-xl' : 'text-lg'
             }`}
             style={{ 
-              color: data.style?.color,
+              color: headerColor,
               letterSpacing: '0.1em'
             }}
           >
@@ -166,7 +169,7 @@ const HeaderSection = ({ section, onChange, onDelete, isEditing }) => {
             </label>
             <input
               type="color"
-              value={data.style?.color || '#1f2937'}
+              value={headerColor}
               onChange={(e) => handleStyleChange('color', e.target.value)}
               className="w-full h-10 border border-gray-300 rounded-md cursor-pointer"
             />
@@ -184,7 +187,7 @@ const HeaderSection = ({ section, onChange, onDelete, isEditing }) => {
             </div>
           )}
           <div className="text-center">
-            <div className="text-sm font-bold" style={{ color: data.style?.color }}>
+            <div className="text-sm font-bold" style={{ color: headerColor }}>
               {data.title}
             </div>
             {data.subtitle && <div className="text-xs text-gray-600">{data.subtitle}</div>}

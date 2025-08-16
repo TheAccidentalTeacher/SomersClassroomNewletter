@@ -10,6 +10,8 @@ const SectionRenderer = ({ section, onChange, onDelete, isEditing, theme }) => {
   const props = { section, onChange, onDelete, isEditing, theme };
 
   switch (section.type) {
+    case SECTION_TYPES.HEADER:
+      return <HeaderSection {...props} />;
     case SECTION_TYPES.TITLE:
       return <TitleSection {...props} />;
     case SECTION_TYPES.RICH_TEXT:

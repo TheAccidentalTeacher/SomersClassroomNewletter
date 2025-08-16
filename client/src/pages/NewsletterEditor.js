@@ -3,7 +3,6 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable } from 'react-beautiful-dnd';
 import { useNewsletter } from '../contexts/NewsletterContext';
 import { useTemplate } from '../contexts/TemplateContext';
-import { useAuth } from '../contexts/AuthContext';
 import SectionRenderer from '../components/editor/SectionRenderer';
 import SectionToolbar from '../components/editor/SectionToolbar';
 import ThemeControls from '../components/editor/ThemeControls';

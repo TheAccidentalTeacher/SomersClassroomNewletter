@@ -18,6 +18,7 @@ const SectionToolbar = ({ onAddSection }) => {
             className="flex items-center justify-center p-3 border-2 border-dashed border-gray-300 rounded-lg hover:border-blue-500 hover:bg-blue-50 transition-colors duration-200 text-sm font-medium text-gray-600 hover:text-blue-600"
           >
             <span className="mr-2">
+              {type === SECTION_TYPES.HEADER && '📋'}
               {type === SECTION_TYPES.TITLE && '📝'}
               {type === SECTION_TYPES.RICH_TEXT && '📄'}
               {type === SECTION_TYPES.EVENTS && '📅'}
