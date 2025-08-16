@@ -10,7 +10,6 @@ import { createSection, SECTION_TYPES } from '../components/editor/SectionTypes'
 const NewsletterEditor = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const { user } = useAuth();
   const { 
     currentNewsletter, 
     loading, 

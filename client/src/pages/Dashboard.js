@@ -18,8 +18,11 @@ const Dashboard = () => {
   } = useNewsletter();
 
   useEffect(() => {
+    console.log('Dashboard: Fetching newsletters...');
     fetchNewsletters();
   }, [fetchNewsletters]);
+
+  console.log('Dashboard render:', { loading, error, newsletters, stats });
 
   const handleCreateNewsletter = () => {
     navigate('/newsletter-editor');
@@ -94,7 +97,7 @@ const Dashboard = () => {
           <div className="flex justify-between items-center">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">
-                Welcome back, {user?.firstName || 'Teacher'}!
+                Welcome back, {user?.displayName || user?.firstName || 'Teacher'}!
               </h1>
               <p className="mt-2 text-gray-600">
                 Manage your classroom newsletters and communicate with parents effectively.
