@@ -1,15 +1,39 @@
 import React, { useState, useEffect } from 'react';
-import { useTemplate } from '../../contexts/TemplateContext';
+// import { useTemplate } from '../contexts/TemplateContext';
 
 const TemplateGallery = ({ onSelectTemplate, currentNewsletter }) => {
-  const { templates, loadTemplates, createFromTemplate } = useTemplate();
+  // const { templates, loadTemplates, createFromTemplate } = useTemplate();
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
   const [previewTemplate, setPreviewTemplate] = useState(null);
 
+  // Mock templates for now
+  const templates = [
+    {
+      id: 'prof-1',
+      title: 'Professional Newsletter',
+      category: 'professional',
+      theme: 'professional',
+      content: {
+        text: 'Welcome to our professional newsletter...'
+      },
+      thumbnail: 'https://via.placeholder.com/300x200/4F46E5/ffffff?text=Professional'
+    },
+    {
+      id: 'colorful-1', 
+      title: 'Colorful Design',
+      category: 'colorful',
+      theme: 'colorful',
+      content: {
+        text: 'Bright and engaging newsletter content...'
+      },
+      thumbnail: 'https://via.placeholder.com/300x200/EC4899/ffffff?text=Colorful'
+    }
+  ];
+
   useEffect(() => {
-    loadTemplates();
-  }, [loadTemplates]);
+    // loadTemplates();
+  }, []);
 
   // Built-in professional templates matching Canva quality
   const builtInTemplates = [
