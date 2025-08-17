@@ -70,7 +70,7 @@ class ImageService {
       debugLogger.info('Getting curated images', { category, options });
 
       const response = await apiService.get(`/images/curated/${category}`, {
-        params: { page, perPage, orientation }
+        page, perPage, orientation
       });
 
       if (!response.success) {

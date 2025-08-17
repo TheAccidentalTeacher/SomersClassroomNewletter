@@ -81,6 +81,34 @@ class ApiService {
     }
   }
 
+  // Generic HTTP methods
+  async get(endpoint, params = {}) {
+    const queryString = params && Object.keys(params).length > 0 
+      ? '?' + new URLSearchParams(params).toString() 
+      : '';
+    return this.request(endpoint + queryString);
+  }
+
+  async post(endpoint, data = {}) {
+    return this.request(endpoint, {
+      method: 'POST',
+      body: data,
+    });
+  }
+
+  async put(endpoint, data = {}) {
+    return this.request(endpoint, {
+      method: 'PUT',
+      body: data,
+    });
+  }
+
+  async delete(endpoint) {
+    return this.request(endpoint, {
+      method: 'DELETE',
+    });
+  }
+
   // Authentication
   async login(credentials) {
     return this.request('/auth/login', {
