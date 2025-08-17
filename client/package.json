@@ -4,6 +4,10 @@
   "description": "React frontend for classroom newsletter generator",
   "private": true,
   "dependencies": {
+    "@react-pdf/renderer": "^4.3.0",
+    "html2canvas": "^1.4.1",
+    "html2pdf.js": "^0.10.3",
+    "jspdf": "^3.0.1",
     "react": "^18.2.0",
     "react-beautiful-dnd": "^13.1.1",
     "react-dom": "^18.2.0",
