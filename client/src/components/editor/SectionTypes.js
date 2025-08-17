@@ -92,15 +92,13 @@ export const createSection = (type, order = 0) => {
     case SECTION_TYPES.IMAGE:
       return {
         ...baseSection,
-        data: {
-          url: '',
-          alt: 'Image description',
-          caption: '',
-          style: {
-            width: '100%',
-            alignment: 'center'
-          }
-        }
+        imageUrl: '',
+        imageAlt: 'Newsletter image',
+        caption: '',
+        size: 'medium', // small, medium, large
+        alignment: 'center', // left, center, right
+        layout: 'default', // default, rounded, circle
+        imageCredit: null // Will be populated when image is selected
       };
 
     default:

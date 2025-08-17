@@ -1,9 +1,13 @@
 import React, { useState, useRef } from 'react';
+import AIContentGenerator from './AIContentGenerator';
+import ImageBrowser from './ImageBrowser';
 
 const RichTextSection = ({ section, onChange, onDelete, isEditing, theme }) => {
   const { data } = section;
   const textareaRef = useRef();
   const [showFormatting, setShowFormatting] = useState(false);
+  const [showAI, setShowAI] = useState(false);
+  const [showImageBrowser, setShowImageBrowser] = useState(false);
 
   const handleChange = (field, value) => {
     onChange(section.id, {
@@ -20,6 +24,31 @@ const RichTextSection = ({ section, onChange, onDelete, isEditing, theme }) => {
         [styleField]: value
       }
     });
+  };
+
+  // Handle AI-generated content
+  const handleAIContentGenerated = (generatedContent) => {
+    // If there's existing content, append with a paragraph break
+    const newContent = data.content ? 
+      data.content + '\n\n' + generatedContent : 
+      generatedContent;
+    
+    handleChange('content', newContent);
+    setShowAI(false); // Close AI panel after generating
+  };
+
+  // Handle image insertion
+  const handleImageSelect = (imageData) => {
+    const imageMarkdown = `![${imageData.description}](${imageData.url})`;
+    const textarea = textareaRef.current;
+    const cursorPos = textarea ? textarea.selectionStart : data.content.length;
+    
+    const beforeText = data.content.substring(0, cursorPos);
+    const afterText = data.content.substring(cursorPos);
+    const newContent = beforeText + '\n\n' + imageMarkdown + '\n\n' + afterText;
+    
+    handleChange('content', newContent);
+    setShowImageBrowser(false);
   };
 
   // Format text with markdown-style syntax
@@ -88,6 +117,7 @@ const RichTextSection = ({ section, onChange, onDelete, isEditing, theme }) => {
     let formatted = text
       .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') // Bold
       .replace(/\*(.*?)\*/g, '<em>$1</em>') // Italic
+      .replace(/!\[(.*?)\]\((.*?)\)/g, '<img src="$2" alt="$1" class="max-w-full h-auto rounded-lg shadow-sm my-4" />') // Images
       .split('\n')
       .map(line => {
         if (line.startsWith('• ')) {
@@ -134,6 +164,18 @@ const RichTextSection = ({ section, onChange, onDelete, isEditing, theme }) => {
       <div className="flex justify-between items-start mb-4">
         <h3 className="text-sm font-semibold text-green-800">Text Content</h3>
         <div className="flex items-center space-x-2">
+          <button
+            onClick={() => setShowAI(!showAI)}
+            className="text-blue-600 hover:text-blue-800 text-sm font-medium flex items-center"
+          >
+            🤖 {showAI ? 'Hide AI' : 'AI Help'}
+          </button>
+          <button
+            onClick={() => setShowImageBrowser(true)}
+            className="text-purple-600 hover:text-purple-800 text-sm font-medium flex items-center"
+          >
+            🖼️ Add Image
+          </button>
           <button
             onClick={() => setShowFormatting(!showFormatting)}
             className="text-green-600 hover:text-green-800 text-sm font-medium"
@@ -252,6 +294,25 @@ Tips:
           </div>
         </div>
       </div>
+
+      {/* AI Content Generator */}
+      {showAI && (
+        <AIContentGenerator
+          onContentGenerated={handleAIContentGenerated}
+          onClose={() => setShowAI(false)}
+          contextType="rich-text"
+        />
+      )}
+
+      {/* Image Browser */}
+      {showImageBrowser && (
+        <ImageBrowser
+          onImageSelect={handleImageSelect}
+          onClose={() => setShowImageBrowser(false)}
+          initialQuery=""
+          contentType="rich-text"
+        />
+      )}
     </div>
   );
 };
