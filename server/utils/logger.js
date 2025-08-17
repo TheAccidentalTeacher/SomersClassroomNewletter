@@ -83,8 +83,10 @@ transports.push(
     })
 );
 
-// File transports (only in production or when LOG_TO_FILE is true)
-if (process.env.NODE_ENV === 'production' || process.env.LOG_TO_FILE === 'true') {
+// File transports (only when explicitly enabled and filesystem is writable)
+const enableFileLogging = process.env.LOG_TO_FILE === 'true' && process.env.NODE_ENV !== 'production';
+
+if (enableFileLogging) {
     const logDir = process.env.LOG_DIR || path.join(__dirname, '../logs');
     
     // Ensure logs directory exists
