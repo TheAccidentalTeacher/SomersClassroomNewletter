@@ -1,7 +1,7 @@
 // Image API Routes - Stock photo search and AI-powered suggestions
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const imageService = require('../services/imageService');
 const logger = require('../utils/logger');
 
@@ -34,7 +34,7 @@ router.get('/status', async (req, res) => {
  * Search for images using query and filters
  * Requires authentication
  */
-router.post('/search', auth, async (req, res) => {
+router.post('/search', authenticate, async (req, res) => {
   try {
     const { 
       query, 
@@ -94,7 +94,7 @@ router.post('/search', auth, async (req, res) => {
  * Get curated images for educational categories
  * Requires authentication
  */
-router.get('/curated/:category', auth, async (req, res) => {
+router.get('/curated/:category', authenticate, async (req, res) => {
   try {
     const { category } = req.params;
     const { page = 1, perPage = 12, orientation = 'all' } = req.query;
@@ -150,7 +150,7 @@ router.get('/curated/:category', auth, async (req, res) => {
  * Generate AI-powered image search suggestions based on content
  * Requires authentication
  */
-router.post('/suggestions', auth, async (req, res) => {
+router.post('/suggestions', authenticate, async (req, res) => {
   try {
     const { content, contentType = 'general' } = req.body;
 
@@ -195,7 +195,7 @@ router.post('/suggestions', auth, async (req, res) => {
  * GET /api/images/categories
  * Get available image categories with descriptions
  */
-router.get('/categories', auth, (req, res) => {
+router.get('/categories', authenticate, (req, res) => {
   try {
     const categories = [
       {
@@ -290,7 +290,7 @@ router.get('/categories', auth, (req, res) => {
  * Analyze newsletter content and suggest relevant images
  * Requires authentication
  */
-router.post('/analyze-content', auth, async (req, res) => {
+router.post('/analyze-content', authenticate, async (req, res) => {
   try {
     const { sections } = req.body;
 

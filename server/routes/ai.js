@@ -1,11 +1,11 @@
 const express = require('express');
 const router = express.Router();
-const auth = require('../middleware/auth');
+const { authenticate } = require('../middleware/auth');
 const aiService = require('../services/aiService');
 const logger = require('../utils/logger');
 
 // Check AI service availability
-router.get('/status', auth, (req, res) => {
+router.get('/status', authenticate, async (req, res) => {
   res.json({
     success: true,
     available: aiService.isAvailable(),
@@ -16,7 +16,7 @@ router.get('/status', auth, (req, res) => {
 });
 
 // Generate AI content
-router.post('/generate-content', auth, async (req, res) => {
+router.post('/generate-content', authenticate, async (req, res) => {
   try {
     const { type, context } = req.body;
 
@@ -63,7 +63,7 @@ router.post('/generate-content', auth, async (req, res) => {
 });
 
 // Get content suggestions (no API call needed)
-router.get('/suggestions/:type', auth, (req, res) => {
+router.get('/suggestions/:type', authenticate, (req, res) => {
   const { type } = req.params;
   
   const suggestions = {
