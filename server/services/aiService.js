@@ -1,5 +1,6 @@
 // Server-side AI Service for complex operations
 const logger = require('../utils/logger');
+const fetch = require('node-fetch');
 
 class AIService {
   constructor() {
@@ -19,8 +20,6 @@ class AIService {
     }
 
     try {
-      const fetch = (await import('node-fetch')).default;
-      
       const prompt = this.buildPrompt(type, context);
       
       const response = await fetch(`${this.baseURL}/chat/completions`, {

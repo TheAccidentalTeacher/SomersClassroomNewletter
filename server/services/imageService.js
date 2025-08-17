@@ -1,6 +1,7 @@
 // Image Service for stock photo integration
 // Supports Unsplash and Pexels APIs for high-quality educational imagery
 const logger = require('../utils/logger');
+const fetch = require('node-fetch');
 
 class ImageService {
   constructor() {
