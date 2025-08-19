@@ -217,10 +217,56 @@ Description: [Event Description]
     );
   }
 
+  // Theme configuration
+  const getThemeObject = (themeName) => {
+    const themes = {
+      professional: {
+        name: 'professional',
+        label: 'Professional Blue',
+        primaryColor: '#2563eb',
+        secondaryColor: '#64748b',
+        accentColor: '#f59e0b',
+        backgroundColor: '#ffffff',
+        fontFamily: 'Georgia, serif'
+      },
+      colorful: {
+        name: 'colorful',
+        label: 'Vibrant & Fun',
+        primaryColor: '#7c3aed',
+        secondaryColor: '#06b6d4',
+        accentColor: '#f59e0b',
+        backgroundColor: '#fef7ff',
+        fontFamily: 'Comic Sans MS, cursive'
+      },
+      minimal: {
+        name: 'minimal',
+        label: 'Clean Minimal',
+        primaryColor: '#374151',
+        secondaryColor: '#9ca3af',
+        accentColor: '#ef4444',
+        backgroundColor: '#ffffff',
+        fontFamily: 'Helvetica, sans-serif'
+      },
+      playful: {
+        name: 'playful',
+        label: 'Playful Kids',
+        primaryColor: '#ec4899',
+        secondaryColor: '#8b5cf6',
+        accentColor: '#10b981',
+        backgroundColor: '#fff7ed',
+        fontFamily: 'Comic Sans MS, cursive'
+      }
+    };
+    return themes[themeName] || themes.professional;
+  };
+
+  const currentThemeObject = getThemeObject(selectedTheme);
+
   debugLogger.info('Rendering newsletter editor', { 
     newsletterTitle: newsletter.title,
     activeTab,
-    theme: selectedTheme 
+    theme: selectedTheme,
+    themeObject: currentThemeObject
   });
 
   return (
@@ -273,7 +319,10 @@ Description: [Event Description]
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
+                onClick={() => {
+                  debugLogger.user('Tab changed', { from: activeTab, to: tab.id });
+                  setActiveTab(tab.id);
+                }}
                 className={`py-4 px-2 border-b-2 font-medium text-sm ${
                   activeTab === tab.id
                     ? 'border-blue-500 text-blue-600'
@@ -368,10 +417,26 @@ Description: [Event Description]
         )}
 
         {activeTab === 'themes' && (
-          <ThemeControls
-            selectedTheme={selectedTheme}
-            onThemeChange={setSelectedTheme}
-          />
+          <div className="bg-white rounded-lg shadow p-6">
+            <h2 className="text-lg font-semibold mb-4">🎭 Theme Customization</h2>
+            <ThemeControls
+              theme={currentThemeObject}
+              onChange={(newTheme) => {
+                debugLogger.user('Theme changed', { 
+                  from: selectedTheme, 
+                  to: newTheme.name || newTheme,
+                  themeData: newTheme
+                });
+                if (typeof newTheme === 'string') {
+                  setSelectedTheme(newTheme);
+                } else {
+                  setSelectedTheme(newTheme.name || 'professional');
+                }
+              }}
+              selectedTheme={selectedTheme}
+              onThemeChange={setSelectedTheme}
+            />
+          </div>
         )}
 
         {activeTab === 'preview' && (
