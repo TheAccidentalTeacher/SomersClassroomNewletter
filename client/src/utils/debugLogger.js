@@ -126,6 +126,16 @@ class DebugLogger {
   api(message, data) { this.log('API', message, data); }
   user(message, data) { this.log('USER', message, data); }
 
+  // Log management methods
+  getLogs() {
+    return [...this.logs]; // Return a copy to prevent external modification
+  }
+
+  clearLogs() {
+    this.logs = [];
+    this.updateDebugPanel();
+  }
+
   // API call tracking
   trackAPICall(url, method, status, duration, response = null, error = null) {
     const statusColor = status >= 200 && status < 300 ? 'SUCCESS' : 'ERROR';
